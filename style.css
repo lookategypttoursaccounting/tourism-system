@@ -1,0 +1,338 @@
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #f1f5f9;
+      padding: 20px;
+      color: #0f172a;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 16px 30px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .header h2 { font-weight: 800; letter-spacing: 0.5px; font-size: 22px; }
+
+    /* ===== شعار الشركة (Company Brand) ===== */
+    .header-brand-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .company-brand { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .header-logo {
+      height: 44px; width: auto; border-radius: 8px;
+      background: #fff; padding: 4px 8px; object-fit: contain;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
+    .company-name {
+      font-size: 22px; font-weight: 800; letter-spacing: 2px;
+      color: #fbbf24; text-transform: uppercase;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    }
+    .company-tagline {
+      font-size: 12px; font-weight: 600; color: #cbd5e1;
+      letter-spacing: 0.6px; font-style: italic;
+    }
+    .header-brand-wrap h2 { font-size: 14px; font-weight: 700; color: #e2e8f0; letter-spacing: 0.3px; }
+    .company-divider { width: 100%; height: 1px; background: linear-gradient(90deg, #fbbf24, transparent); margin: 2px 0; }
+
+    /* شعار الشركة في شاشة الدخول */
+    .login-company { margin-bottom: 14px; }
+    .login-company .company-name { font-size: 24px; color: #b45309; text-shadow: none; }
+    .login-company .company-tagline { color: #64748b; font-size: 13px; }
+    .user-email { color: #94a3b8; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.08); padding: 6px 14px; border-radius: 20px; }
+
+    .app-layout { display: flex; gap: 24px; align-items: flex-start; }
+
+    .tabs-vertical {
+      width: 260px; flex-shrink: 0; background: #ffffff;
+      border-radius: 16px; padding: 12px 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+    }
+    .tab-btn {
+      background: transparent; border: none; padding: 12px 16px;
+      border-radius: 10px; font-weight: 700; color: #475569;
+      font-size: 15px; transition: 0.2s; width: 100%; text-align: right;
+      display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 4px;
+    }
+    .tab-btn:hover { background: #f1f5f9; color: #0f172a; }
+    .tab-btn.active { background: #2563eb; color: white; box-shadow: 0 4px 8px rgba(37,99,235,0.25); }
+    
+    .sub-tabs-container {
+      padding-right: 12px; margin: 4px 0 8px 0;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .sub-tab-btn {
+      background: transparent; border: none; padding: 10px 14px;
+      border-radius: 8px; font-weight: 600; color: #64748b;
+      font-size: 14px; text-align: right; cursor: pointer; transition: 0.2s;
+    }
+    .sub-tab-btn:hover { background: #f8fafc; color: #1e293b; }
+    .sub-tab-btn.active { background: #0d9488; color: white; font-weight: 700; }
+
+    .main-content-area { flex: 1; min-width: 0; }
+    .tab-content {
+      display: none; background: white; padding: 28px;
+      border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      border: 1px solid #e2e8f0; animation: fadeIn 0.3s ease;
+    }
+    .tab-content.active { display: block; }
+    .sub-tab-content { display: none; animation: fadeIn 0.25s ease; }
+    .sub-tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-row { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 8px; }
+    .form-group { flex: 1; min-width: 200px; margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; font-weight: 700; color: #1e293b; font-size: 14px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0;
+      border-radius: 10px; font-family: inherit; font-size: 14px;
+      transition: 0.2s; background: #f8fafc;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #2563eb; outline: none; background: white;
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+    }
+    input:disabled, select:disabled, textarea:disabled {
+      background: #e2e8f0; color: #94a3b8; cursor: not-allowed; opacity: 0.8;
+    }
+    
+    .amount-input-group { display: flex; gap: 8px; align-items: center; width: 100%; }
+    .amount-input-group input[type="number"] { flex: 1 1 auto; min-width: 0; }
+    .amount-input-group select { flex: 0 0 110px; }
+
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    button, .btn-label {
+      padding: 10px 20px; border: none; border-radius: 10px;
+      font-weight: 700; font-size: 14px; cursor: pointer;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-btn { background: #16a34a; color: white; }
+    .submit-btn:hover:not(:disabled) { background: #15803d; transform: translateY(-1px); }
+    .excel-btn { background: #107c41; color: white; }
+    .excel-btn:hover:not(:disabled) { background: #0b5c30; }
+    .print-btn { background: #64748b; color: white; }
+    .print-btn:hover:not(:disabled) { background: #475569; }
+    .pdf-btn { background: #ef4444; color: white; }
+    .pdf-btn:hover:not(:disabled) { background: #dc2626; }
+    .delete-btn { background: #ef4444; color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; }
+    .delete-btn:hover { background: #b91c1c; }
+    .edit-btn { background: #eab308; color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; }
+    .edit-btn:hover { background: #ca8a04; }
+    .approve-btn { background: #0d9488; color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; }
+    .approve-btn:hover { background: #0f766e; }
+    .unapprove-btn { background: #475569; color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; }
+    .unapprove-btn:hover { background: #334155; }
+    .search-btn { background: #2563eb; color: white; }
+    .search-btn:hover:not(:disabled) { background: #1d4ed8; }
+    .add-more-btn { background: #0284c7; color: white; padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+    .add-more-btn:hover { background: #0369a1; }
+
+    .statement-container { background: #f8fafc; border-radius: 16px; padding: 20px; border: 1px solid #e2e8f0; }
+    .statement-header-banner {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      color: white; padding: 20px 25px; border-radius: 14px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+    }
+    
+    .statement-cards-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .st-card {
+      background: white; border-radius: 12px; padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;
+    }
+    .st-card.debit { border-right: 5px solid #16a34a; background: #f0fdf4; }
+    .st-card.credit { border-right: 5px solid #dc2626; background: #fef2f2; }
+    .st-card.balance { border-right: 5px solid #2563eb; background: #eff6ff; }
+    .st-card.commission { border-right: 5px solid #16a34a; background: #f0fdf4; }
+    
+    .st-card-info { display: flex; flex-direction: column; }
+    .st-card-title { font-size: 13px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .st-card-val { font-size: 20px; font-weight: 800; }
+    .st-card-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; }
+    .debit .st-card-icon { background: #dcfce7; color: #16a34a; }
+    .credit .st-card-icon { background: #fee2e2; color: #dc2626; }
+    .balance .st-card-icon { background: #dbeafe; color: #2563eb; }
+    .commission .st-card-icon { background: #dcfce7; color: #16a34a; }
+
+    .statement-info-bar {
+      background: #eff6ff; border: 1px dashed #93c5fd; padding: 12px 20px;
+      border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 15px; font-weight: 700; color: #1e3a8a; margin-bottom: 20px;
+    }
+
+    .filter-panel { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+
+    .running-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; }
+    .running-table th { background: #1e293b; color: white; font-weight: 700; padding: 14px; text-align: center; font-size: 14px; }
+    .running-table td { padding: 12px 14px; text-align: center; border-bottom: 1px solid #e2e8f0; background: white; font-size: 14px; }
+    .running-table tr:hover td { background: #f8fafc; }
+
+    .dashboard-grid { display: flex; gap: 18px; margin-bottom: 25px; flex-wrap: wrap; }
+    .dash-card {
+      flex: 1; min-width: 210px; padding: 20px;
+      border-radius: 16px; border: 1px solid #e2e8f0;
+      background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .dash-card-title { font-size: 13px; font-weight: 700; display: block; margin-bottom: 8px; color: #64748b; }
+    .dash-card-value { font-size: 22px; font-weight: 800; direction: ltr; text-align: right; }
+    .dash-card-value.currency-breakdown { font-size: 15px; display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+    .dash-card-value.currency-breakdown .cur-row { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.04); padding: 4px 10px; border-radius: 8px; }
+    .dash-card-value.currency-breakdown .cur-code { font-size: 11px; font-weight: 700; opacity: 0.75; }
+
+    .table-wrapper { overflow-x: auto; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: #f1f5f9; color: #1e293b; font-weight: 700; padding: 12px 14px; text-align: right; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+    
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; display: inline-block; }
+    .badge-hotel { background: #dbeafe; color: #1e40af; }
+    .badge-cruise { background: #fef3c7; color: #92400e; }
+    .badge-restaurant { background: #fce7f3; color: #9d174d; }
+    .badge-deposit { background: #dcfce7; color: #15803d; }
+    .badge-deduction { background: #fee2e2; color: #b91c1c; }
+    .badge-taxable { background: #dcfce7; color: #166534; }
+    .badge-advance { background: #e0e7ff; color: #3730a3; }
+    .badge-archive { background: #ccfbf1; color: #0f766e; }
+    .badge-void { background: #e5e7eb; color: #374151; }
+
+    .suggestions-dropdown {
+      position: absolute; top: 100%; left: 0; right: 0;
+      background: white; border: 1px solid #cbd5e1; border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15); max-height: 220px;
+      overflow-y: auto; z-index: 99; margin-top: 4px;
+    }
+    .suggestion-item {
+      padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9;
+      display: flex; justify-content: space-between; align-items: center; transition: 0.15s;
+    }
+    .suggestion-item:hover { background: #eff6ff; color: #2563eb; }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; padding: 30px; border-radius: 20px;
+      width: 90%; max-width: 700px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      max-height: 85vh; overflow-y: auto;
+    }
+
+    /* ===== شاشة الدخول (Login / Role-based access) ===== */
+    .login-screen {
+      position: fixed; inset: 0; z-index: 5000;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-card {
+      background: #fff; border-radius: 20px; padding: 36px 30px;
+      width: 100%; max-width: 430px; box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      text-align: center;
+    }
+    .login-logo { margin-bottom: 16px; }
+    .login-logo img {
+      width: 100%; max-width: 300px; height: auto;
+      display: block; margin: 0 auto; border-radius: 10px;
+    }
+    .login-logo .company-tagline {
+      color: #64748b; font-size: 14px; font-weight: 600;
+      font-style: italic; letter-spacing: 0.6px; margin-top: 10px;
+    }
+    .login-card h2 { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .login-card p { font-size: 14px; color: #64748b; margin-bottom: 22px; }
+    .login-roles { display: flex; gap: 12px; margin-bottom: 20px; }
+    .login-role-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 16px 10px; border: 2px solid #e2e8f0; border-radius: 14px;
+      background: #f8fafc; color: #475569; font-weight: 700; font-size: 14px; cursor: pointer;
+      transition: 0.2s;
+    }
+    .login-role-btn:hover { border-color: #cbd5e1; }
+    .login-role-btn.active { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
+    .login-role-icon { font-size: 26px; display: inline-flex; align-items: center; justify-content: center; }
+    /* أيقونة الآلة الحاسبة — لون فاتح وشفاف (بنفس لون زر السياحة) */
+    .login-role-icon .calc-icon {
+      width: 30px; height: 30px; display: block;
+      color: rgba(71, 85, 105, 0.55);
+    }
+
+    /* ===== قسم السياحة (Tourism) ===== */
+    .tourism-layout { display: flex; gap: 24px; align-items: flex-start; }
+    .tourism-subtabs {
+      width: 260px; flex-shrink: 0; background: #ffffff;
+      border-radius: 16px; padding: 12px 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .tourism-subtabs .sub-tab-btn {
+      padding: 14px 16px; font-size: 15px; border-radius: 10px;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+    }
+    .tourism-subtabs .sub-tab-btn.active { background: #0d9488; color: #fff; border-color: #0d9488; }
+    .tourism-content-area { flex: 1; min-width: 0; }
+    .tourism-subtab-content {
+      display: none; background: white; padding: 28px;
+      border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      border: 1px solid #e2e8f0; animation: fadeIn 0.3s ease;
+    }
+    .tourism-subtab-content.active { display: block; }
+    /* اسم الجهة (فندق/كروز) قابل للضغط لعرض تفاصيل الحركة */
+    .entity-link {
+      color: #0d9488; cursor: pointer; text-decoration: underline;
+      text-decoration-style: dotted; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+    .entity-link:hover { color: #0f766e; text-decoration-style: solid; }
+    @media (max-width: 768px) {
+      .tourism-layout { flex-direction: column; }
+      .tourism-subtabs { width: 100%; flex-direction: row; flex-wrap: wrap; }
+    }
+
+    .pdf-report-header {
+      display: none;
+      background: #0f172a; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;
+    }
+    .pdf-report-header h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .pdf-report-header p { font-size: 13px; color: #94a3b8; }
+
+    .toast-container { position: fixed; top: 20px; left: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      padding: 14px 24px; border-radius: 12px; color: white;
+      font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      animation: slideIn 0.4s ease; min-width: 250px;
+      border-right: 6px solid rgba(255,255,255,0.3);
+    }
+    .toast.success { background: #16a34a; }
+    .toast.error { background: #dc2626; }
+    .toast.info { background: #2563eb; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (max-width: 768px) {
+      .app-layout { flex-direction: column; }
+      .tabs-vertical { width: 100%; }
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printableArea, #printableArea *, #printableSuppliersArea, #printableSuppliersArea *,
+      #printableStatementArea, #printableStatementArea *,
+      #printableAviationArea, #printableAviationArea *,
+      #printableTicketsArea, #printableTicketsArea *,
+      #printableTicketsBalanceArea, #printableTicketsBalanceArea *,
+      #printableShopsArea, #printableShopsArea *,
+      #printableSettlementArea, #printableSettlementArea *,
+      #printableSettlementArchiveArea, #printableSettlementArchiveArea *,
+      #printableTourismTicketsBalanceArea, #printableTourismTicketsBalanceArea *,
+      #printableTourismArea, #printableTourismArea * { visibility: visible; }
+      #printableArea, #printableSuppliersArea, #printableStatementArea, #printableAviationArea, #printableTicketsArea, #printableTicketsBalanceArea, #printableShopsArea, #printableSettlementArea, #printableSettlementArchiveArea, #printableTourismTicketsBalanceArea, #printableTourismArea { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; }
+      .no-print { display: none !important; }
+      .pdf-report-header { display: block !important; }
+    }

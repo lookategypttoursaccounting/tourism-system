@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt | منظومة الحسابات السياحية</title>
+  <!-- مكتبة Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- مكتبة PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN (ROLE-BASED ACCESS) ================= -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.jpg" alt="LOOK ATEGYPT TOURS — The Luxury DMC of Egypt">
+      <div class="company-tagline">The Luxury DMC of Egypt</div>
+    </div>
+    <p data-i18n="login_subtitle">اختر نوع الدخول للمتابعة</p>
+    <div class="login-roles">
+      <button class="login-role-btn" id="roleAdminBtn" onclick="selectLoginRole('admin')">
+        <span class="login-role-icon">
+          <svg class="calc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="4.5" y="2.5" width="15" height="19" rx="2.5"/>
+            <rect x="7.5" y="5.5" width="9" height="3.2" rx="0.8"/>
+            <circle cx="8.6" cy="12.3" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="12.3" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="15.4" cy="12.3" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="8.6" cy="15.6" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="15.6" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="15.4" cy="15.6" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="8.6" cy="18.9" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="12" cy="18.9" r="0.55" fill="currentColor" stroke="none"/>
+            <circle cx="15.4" cy="18.9" r="0.55" fill="currentColor" stroke="none"/>
+          </svg>
+        </span>
+        <span data-i18n="login_role_admin">الحسابات</span>
+      </button>
+      <button class="login-role-btn" id="roleTourismBtn" onclick="selectLoginRole('tourism')">
+        <span class="login-role-icon">🌍</span>
+        <span data-i18n="login_role_tourism">السياحة</span>
+      </button>
+    </div>
+    <div id="loginPinWrap" style="display:none;">
+      <input type="password" id="loginPinInput" autocomplete="off"
+             data-i18n-placeholder="login_pin_placeholder" placeholder="أدخل رمز الدخول"
+             style="text-align:center; font-size:20px; letter-spacing:3px; font-weight:800;"
+             onkeydown="if(event.key==='Enter'){submitLogin();}">
+      <div id="loginError" data-i18n="login_error" style="display:none; color:#dc2626; font-weight:700; font-size:13px; margin-top:10px;">رمز الدخول غير صحيح</div>
+      <button class="submit-btn" style="width:100%; margin-top:18px; padding:14px;" onclick="submitLogin()" data-i18n="btn_enter">دخول</button>
+    </div>
+  </div>
+</div>
+
+<div id="appScreen" style="display:none;">
+  <div class="header">
+    <div class="header-brand-wrap">
+      <div class="company-brand">
+        <img src="logo.jpg" alt="LOOK ATEGYPT TOURS" class="header-logo">
+        <span class="company-name">LOOK ATEGYPT TOURS</span>
+        <span class="company-tagline">The Luxury DMC of Egypt</span>
+      </div>
+      <div class="company-divider"></div>
+      <h2 data-i18n="header_title">📊 منظومة الحسابات والتصفية السياحية المتقدمة</h2>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="user-email" data-i18n="header_subtitle">🔓 وضع المستقل | الإدارة العامة</div>
+      <button id="langToggleBtn" onclick="toggleLanguage()" style="background:#ffffff22; color:#fff; border:1px solid #ffffff55; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;">EN</button>
+      <button onclick="logout()" data-i18n="login_logout" style="background:#dc2626; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700; cursor:pointer;">🚪 تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <div class="tabs-vertical">
+      <button class="tab-btn active" onclick="openTab(event, 'masterDashboardTab')"><span data-i18n="nav_dashboard">📈 Dashboard الرئيسية</span></button>
+
+      <button class="tab-btn" id="tourismBtn" onclick="previewTourism()" style="background:linear-gradient(135deg,#0d9488,#0f766e); color:#fff;">
+        <span data-i18n="preview_tourism">🌍 معاينة قسم السياحة</span>
+        <span style="font-size:12px;">👁️</span>
+      </button>
+
+      <button class="tab-btn" id="accountsBtn" onclick="toggleAccountsMenu(event)">
+        <span data-i18n="nav_accounts">🧮 الحسابات</span>
+        <span id="accountsArrowIcon" style="font-size:12px;">▼</span>
+      </button>
+      <div id="accountsSubMenu" class="sub-tabs-container" style="display:none;">
+        <button class="tab-btn" id="taxDiscountBtn" onclick="toggleTaxDiscountMenu(event)">
+          <span data-i18n="nav_tax_discount">📋 الخصم والإضافة</span>
+          <span id="taxArrowIcon" style="font-size:12px;">▼</span>
+        </button>
+        <div id="taxDiscountSubMenu" class="sub-tabs-container" style="display:none;">
+          <button class="sub-tab-btn active" onclick="openSubTab(event, 'addSupplierSubTab', 'taxDiscountTab')" data-i18n="sub_add_supplier">1- إضافة مورد</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'suppliersListSubTab', 'taxDiscountTab')" data-i18n="sub_suppliers_list">2- قائمة الموردين</button>
+        </div>
+
+        <button class="tab-btn" id="creditBtn" onclick="toggleCreditMenu(event)">
+          <span data-i18n="nav_credit">💳 أرصدة الكريديت</span>
+          <span id="creditArrowIcon" style="font-size:12px;">▼</span>
+        </button>
+        <div id="creditSubMenu" class="sub-tabs-container" style="display:none;">
+          <button class="sub-tab-btn active" onclick="openSubTab(event, 'addCreditSubTab', 'creditTab')" data-i18n="sub_add_credit">1- تسجيل حركة</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'creditRecordsSubTab', 'creditTab')" data-i18n="sub_credit_records">2- سجل العمليات</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'creditSummarySubTab', 'creditTab')" data-i18n="sub_credit_summary">3- الملخص والـ Dashboard</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'creditStatementSubTab', 'creditTab')" data-i18n="sub_credit_statement">4- كشف حساب</button>
+        </div>
+
+        <!-- قسم تصفية الأوبريتور -->
+        <button class="tab-btn" id="settlementBtn" onclick="toggleSettlementMenu(event)">
+          <span data-i18n="nav_settlement">📄 تصفية الأوبريتور</span>
+          <span id="settlementArrowIcon" style="font-size:12px;">▼</span>
+        </button>
+        <div id="settlementSubMenu" class="sub-tabs-container" style="display:none;">
+          <button class="sub-tab-btn active" onclick="openSubTab(event, 'addSettlementSubTab', 'settlementTab')" data-i18n="sub_add_settlement">1- إضافة تصفية ملف</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'settlementListSubTab', 'settlementTab')" data-i18n="sub_settlement_list">2- سجل تصفيات الملفات</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'settlementArchiveSubTab', 'settlementTab')" data-i18n="sub_settlement_archive">3- الأرشيف (التصفيات المعتمدة)</button>
+        </div>
+
+        <button class="tab-btn" id="ticketsBtn" onclick="toggleTicketsMenu(event)">
+          <span data-i18n="nav_tickets">🎟️ مخزون التذاكر</span>
+          <span id="ticketsArrowIcon" style="font-size:12px;">▼</span>
+        </button>
+        <div id="ticketsSubMenu" class="sub-tabs-container" style="display:none;">
+          <button class="sub-tab-btn active" onclick="openSubTab(event, 'addTicketSubTab', 'ticketsTab')" data-i18n="sub_add_ticket">1- إضافة تذكرة مزار</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'ticketsListSubTab', 'ticketsTab')" data-i18n="sub_tickets_list">2- سجل التذاكر والمخزون</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'ticketsBalanceSubTab', 'ticketsTab')" data-i18n="sub_tickets_balance">3- أرصدة التذاكر</button>
+        </div>
+
+        <button class="tab-btn" id="shopsBtn" onclick="toggleShopsMenu(event)">
+          <span data-i18n="nav_shops">🛍️ المحلات</span>
+          <span id="shopsArrowIcon" style="font-size:12px;">▼</span>
+        </button>
+        <div id="shopsSubMenu" class="sub-tabs-container" style="display:none;">
+          <button class="sub-tab-btn active" onclick="openSubTab(event, 'addShopDirectorySubTab', 'shopsTab')" data-i18n="sub_add_shop_directory">1- إضافة محل</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'shopDirectoryListSubTab', 'shopsTab')" data-i18n="sub_shop_directory_list">2- دليل المحلات</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'addShopSubTab', 'shopsTab')" data-i18n="sub_add_shop">3- تسجيل حركة</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'shopRecordsSubTab', 'shopsTab')" data-i18n="sub_shop_records">4- سجل العمليات</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'shopSummarySubTab', 'shopsTab')" data-i18n="sub_shop_summary">5- الملخص والـ Dashboard</button>
+        </div>
+      </div>
+
+      <button class="tab-btn" id="aviationBtn" onclick="toggleAviationMenu(event)">
+        <span data-i18n="nav_aviation">✈️ حجوزات الطيران</span>
+        <span id="aviationArrowIcon" style="font-size:12px;">▼</span>
+      </button>
+      <div id="aviationSubMenu" class="sub-tabs-container" style="display:none;">
+        <button class="sub-tab-btn active" onclick="openSubTab(event, 'addAviationSubTab', 'aviationTab')" data-i18n="sub_add_aviation">1- إضافة حجز طيران</button>
+        <button class="sub-tab-btn" onclick="openSubTab(event, 'aviationListSubTab', 'aviationTab')" data-i18n="sub_aviation_list">2- سجل حجوزات الطيران</button>
+        <button class="sub-tab-btn" onclick="openSubTab(event, 'aviationCommissionSubTab', 'aviationTab')" data-i18n="sub_aviation_commission">3- العمولة</button>
+      </div>
+    </div>
+
+    <div class="main-content-area">
+      
+      <!-- ================= MASTER DASHBOARD TAB ================= -->
+      <div id="masterDashboardTab" class="tab-content active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 data-i18n="dash_title">📈 Dashboard العامة المتقدمة</h3>
+          <div class="btn-group no-print" style="margin:0;">
+            <button class="print-btn" onclick="changeAdminPin()" data-i18n="change_admin_pin">🔑 تغيير رمز الحسابات</button>
+            <button class="pdf-btn" onclick="downloadMasterDashboardPDF()" data-i18n="dash_pdf_btn">📄 تقرير PDF شامل</button>
+          </div>
+        </div>
+
+        <div id="printableMasterDashboard">
+          <div class="pdf-report-header">
+            <h2 data-i18n="dash_report_h2">التقرير المالي العام والمؤشرات العامة</h2>
+            <p data-i18n="dash_report_p">منظومة الحسابات السياحية الشاملة</p>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dash-card" style="border-right:5px solid #2563eb; background:#eff6ff;">
+              <span class="dash-card-title" style="color:#1d4ed8;" data-i18n="dash_card_suppliers">🏢 إجمالي الموردين المسجلين</span>
+              <div class="dash-card-value" id="mDashTotalSuppliers" style="color:#1e40af;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #16a34a; background:#f0fdf4;">
+              <span class="dash-card-title" style="color:#15803d;" data-i18n="dash_card_credit_egp">💳 صافي رصيد الكريديت (EGP)</span>
+              <div class="dash-card-value" id="mDashCreditEGP" style="color:#166534;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #0284c7; background:#f0f9ff;">
+              <span class="dash-card-title" style="color:#0369a1;" data-i18n="dash_card_credit_usd">💵 صافي رصيد الكريديت (USD)</span>
+              <div class="dash-card-value" id="mDashCreditUSD" style="color:#075985;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #eab308; background:#fefce8;">
+              <span class="dash-card-title" style="color:#ca8a04;" data-i18n="dash_card_credit_eur">💶 صافي رصيد الكريديت (EUR)</span>
+              <div class="dash-card-value" id="mDashCreditEUR" style="color:#a16207;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #7c3aed; background:#f5f3ff;">
+              <span class="dash-card-title" style="color:#6d28d9;" data-i18n="dash_card_aviation">✈️ إجمالي مصروفات الطيران</span>
+              <div class="dash-card-value" id="mDashTotalAviation" style="color:#5b21b6;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #d97706; background:#fffbeb;">
+              <span class="dash-card-title" style="color:#b45309;" data-i18n="dash_card_tickets">🎟️ إجمالي عدد التذاكر الفعلية</span>
+              <div class="dash-card-value" id="mDashTotalTickets" style="color:#92400e;">0</div>
+            </div>
+            <div class="dash-card" style="border-right:5px solid #059669; background:#ecfdf5;">
+              <span class="dash-card-title" style="color:#047857;" data-i18n="dash_card_commissions">💵 اجمالي العمولات المصروفه</span>
+              <div class="dash-card-value" id="mDashTotalSettlementCommissions" style="color:#065f46;">0</div>
+            </div>
+          </div>
+
+          <h4 style="margin-top:25px; margin-bottom:12px; color:#1e293b;" data-i18n="dash_summary_h4">📋 ملخص القطاعات والعمليات بالحاسبة اللحظية</h4>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="dash_th_sector">القطاع</th>
+                  <th data-i18n="dash_th_records">عدد السجلات</th>
+                  <th data-i18n="dash_th_in">إجمالي الوارد / المدين</th>
+                  <th data-i18n="dash_th_out">إجمالي الصادر / المصروفات</th>
+                  <th data-i18n="dash_th_net">الصافي والتراكمي</th>
+                </tr>
+              </thead>
+              <tbody id="masterDashboardTbody">
+                <tr><td colspan="5" style="text-align:center;">جاري تجميع البيانات...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TAX DISCOUNT TAB ================= -->
+      <div id="taxDiscountTab" class="tab-content">
+        <div id="addSupplierSubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_supplier">تسجيل مورد جديد</h3>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_type">النوع</label><select id="supplierType"><option value="فندق" data-i18n="opt_hotel">فندق</option><option value="كروز" data-i18n="opt_cruise">كروز</option><option value="مطعم" data-i18n="opt_restaurant">مطعم</option></select></div>
+            <div class="form-group"><label data-i18n="lbl_property_name">الاسم (فندق/كروز/مطعم)</label><input type="text" id="propertyName" placeholder="الاسم" data-i18n-placeholder="ph_name"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_supplier_name">اسم المورد</label><input type="text" id="supplierName" placeholder="اسم المورد" data-i18n-placeholder="lbl_supplier_name"></div>
+            <div class="form-group"><label data-i18n="lbl_tax_card_number">رقم البطاقة الضريبية</label><input type="text" id="taxCardNumber" placeholder="رقم البطاقة" data-i18n-placeholder="ph_tax_card"></div>
+          </div>
+          <div class="form-group"><label data-i18n="lbl_tax_status">حالة الضريبة</label><select id="taxType"><option value="0.03" data-i18n="opt_taxed_3">خاضع لضريبة 3%</option><option value="advance_payment" data-i18n="opt_advance_payment">دفعات مقدمة</option></select></div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveSupplier" onclick="App.saveSupplier()" data-i18n="btn_save_data">حفظ البيانات</button>
+          </div>
+
+          <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #cbd5e1;">
+            <h4 style="margin-bottom:10px; color:#0f172a;" data-i18n="h_import_suppliers">📥 استيراد عدة موردين دفعة واحدة (ملف إكسيل)</h4>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">أعمدة الملف المطلوبة: <strong>النوع، الاسم، المورد، الرقم الضريبي، حالة الضريبة</strong> (اكتب "خاضع 3%" أو "دفعات مقدمة")</p>
+            <input type="file" id="supplierExcelFile" accept=".xlsx,.xls" style="display:none;" onchange="App.importSuppliersFromExcel()">
+            <button class="excel-btn" id="btnImportSuppliersExcel" onclick="document.getElementById('supplierExcelFile').click()" data-i18n="btn_choose_import">📥 اختيار ملف واستيراد</button>
+          </div>
+        </div>
+
+        <div id="suppliersListSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_suppliers_list">سجل الموردين</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="print-btn" onclick="printSuppliersList()" data-i18n="btn_print">𖥕 طباعة</button>
+              <button class="pdf-btn" onclick="downloadSuppliersPDF()" data-i18n="btn_pdf">📄 PDF</button>
+              <button class="excel-btn" onclick="App.exportSuppliersList()" data-i18n="btn_excel">📊 Excel</button>
+              <input type="text" id="searchSupplier" placeholder="🔍 بحث..." onkeyup="filterSuppliersTable()" style="max-width:200px;" data-i18n-placeholder="ph_search">
+            </div>
+          </div>
+          <div id="printableSuppliersArea">
+            <div class="pdf-report-header">
+              <h2 data-i18n="report_suppliers_h2">تقرير سجل الموردين المسجلين</h2>
+              <p data-i18n="report_suppliers_p">منظومة الحسابات والخصم والإضافة</p>
+            </div>
+            <div class="table-wrapper"><table id="suppliersTable"><thead><tr><th>#</th><th data-i18n="lbl_type">النوع</th><th data-i18n="lbl_name">الاسم</th><th data-i18n="lbl_supplier">المورد</th><th data-i18n="lbl_tax_number">الرقم الضريبي</th><th data-i18n="lbl_tax_status">حالة الضريبة</th><th data-i18n="lbl_date">التاريخ</th><th class="no-print" data-i18n="lbl_actions">إجراءات</th></tr></thead><tbody id="suppliersTableBody"><tr><td colspan="8" style="text-align:center;" data-i18n="msg_loading">جاري التحميل...</td></tr></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= CREDIT TAB ================= -->
+      <div id="creditTab" class="tab-content">
+        <div id="addCreditSubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_credit">تسجيل حركة كريديت</h3>
+          <div class="form-row">
+            <div class="form-group" style="position:relative;">
+              <label>الجهة / المورد</label>
+              <input type="text" id="creditEntity" placeholder="أدخل اسم المورد أو الجهة..." autocomplete="off" oninput="searchCreditEntitySuggestions()" onfocus="searchCreditEntitySuggestions()">
+              <div id="creditEntitySuggestions" class="suggestions-dropdown" style="display:none;"></div>
+            </div>
+            <div class="form-group"><label>رقم الملف</label><input type="text" id="creditFileCode" placeholder="EG-2026-99"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>تاريخ الوصول</label><input type="date" id="creditArrivalDate"></div>
+            <div class="form-group"><label>تاريخ المغادرة</label><input type="date" id="creditDepartureDate"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>نوع الحركة</label><select id="creditType"><option value="deposit">مدين (لنا)</option><option value="deduction">دائن (المستخدم)</option></select></div>
+            <div class="form-group">
+              <label>المبلغ والعملة</label>
+              <div class="amount-input-group">
+                <input type="number" id="creditAmount" placeholder="أدخل المبلغ..." step="any" inputmode="decimal">
+                <select id="creditCurrency">
+                  <option value="EGP">EGP</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="form-group"><label>البيان</label><textarea id="creditDescription" placeholder="تفاصيل الحركة..."></textarea></div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveCredit" onclick="App.saveCredit()">تسجيل الحركة</button>
+          </div>
+
+          <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #cbd5e1;">
+            <h4 style="margin-bottom:10px; color:#0f172a;" data-i18n="h_import_credit">📥 استيراد عدة حركات دفعة واحدة (ملف إكسيل)</h4>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">أعمدة الملف المطلوبة: <strong>الجهة، رقم الملف، الوصول، المغادرة، النوع، المبلغ، العملة، البيان</strong> (النوع: "مدين" أو "دائن")</p>
+            <input type="file" id="creditExcelFile" accept=".xlsx,.xls" style="display:none;" onchange="App.importCreditFromExcel()">
+            <button class="excel-btn" id="btnImportCreditExcel" onclick="document.getElementById('creditExcelFile').click()">📥 اختيار ملف واستيراد</button>
+          </div>
+        </div>
+
+        <div id="creditRecordsSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_credit_records">سجل العمليات</h3>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="text" id="searchCredit" placeholder="🔍 بحث..." onkeyup="filterCreditTable()" style="max-width:200px;">
+              <button class="excel-btn" onclick="App.exportCreditList()">📊 Excel</button>
+            </div>
+          </div>
+          <div class="table-wrapper"><table id="creditTable"><thead><tr><th>#</th><th>الجهة</th><th>رقم الملف</th><th>الوصول</th><th>المغادرة</th><th>النوع</th><th>المبلغ</th><th>العملة</th><th>البيان</th><th>التاريخ</th><th>إجراءات</th></tr></thead><tbody id="creditTableBody"><tr><td colspan="11" style="text-align:center;">جاري التحميل...</td></tr></tbody></table></div>
+        </div>
+
+        <div id="creditSummarySubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 data-i18n="h_credit_summary">ملخص Dashboard الكريديت</h3>
+            <div class="btn-group no-print" style="margin:0;"><button class="print-btn" onclick="printDashboard()">𖥕 طباعة</button><button class="pdf-btn" onclick="downloadDashboardPDF()">📄 PDF</button></div>
+          </div>
+          <div id="printableArea">
+            <div class="pdf-report-header">
+              <h2>تقرير ملخص أرصدة الكريديت</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+            </div>
+            <div class="dashboard-grid">
+              <div class="dash-card" style="border-right:4px solid #16a34a;background:#f0fdf4;"><span class="dash-card-title" style="color:#166534;">إجمالي المدين</span><div class="dash-card-value currency-breakdown" id="dashTotalDeposits" style="color:#15803d;">0</div></div>
+              <div class="dash-card" style="border-right:4px solid #dc2626;background:#fef2f2;"><span class="dash-card-title" style="color:#991b1b;">إجمالي الدائن</span><div class="dash-card-value currency-breakdown" id="dashTotalDeductions" style="color:#b91c1c;">0</div></div>
+              <div class="dash-card" style="border-right:4px solid #0284c7;background:#f0f9ff;"><span class="dash-card-title" style="color:#075985;">صافي الرصيد</span><div class="dash-card-value currency-breakdown" id="dashNetBalance" style="color:#0369a1;">0</div></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px;"><h4>ملخص الأرصدة التجميعي</h4><input type="text" id="searchEntitySummary" class="no-print" placeholder="🔍 بحث..." onkeyup="filterEntitySummaryTable()" style="max-width:200px;"></div>
+            <div class="table-wrapper"><table id="entitySummaryTable"><thead><tr><th>#</th><th>الجهة</th><th>العملة</th><th>إجمالي المدين</th><th>إجمالي الدائن</th><th>صافي الرصيد</th><th>الحالة</th></tr></thead><tbody id="entitySummaryTableBody"><tr><td colspan="7" style="text-align:center;">جاري الحساب...</td></tr></tbody></table></div>
+          </div>
+        </div>
+
+        <div id="creditStatementSubTab" class="sub-tab-content">
+          <div class="statement-container">
+            <div class="statement-header-banner">
+              <div>
+                <h2 style="margin:0; font-size:24px;">📄 كشف الحساب التفصيلي المستقل</h2>
+                <span style="opacity:0.85; font-size:14px;">يقرأ الموردين المسجلين في حركات الكريديت فقط</span>
+              </div>
+            </div>
+
+            <div class="statement-search-bar no-print">
+              <button class="search-btn statement-search-toggle" id="statementSearchToggleBtn" onclick="toggleStatementSearchPanel()">🔍 بحث</button>
+            </div>
+
+            <div id="statementSearchPanel" class="statement-search-panel no-print" style="display:none;">
+              <div class="ssp-header">
+                <span>🔍 البحث في كشف الحساب</span>
+                <button class="ssp-close" onclick="toggleStatementSearchPanel()" title="إغلاق">✖</button>
+              </div>
+              <div class="ssp-body">
+                <div class="form-group" style="position:relative;">
+                  <label>اسم الحساب</label>
+                  <input type="text" id="stEntityName" placeholder="اكتب اسم الفندق أو الجهة..." autocomplete="off" oninput="searchStatementEntities()" onfocus="searchStatementEntities()">
+                  <div id="stEntitySuggestions" class="suggestions-dropdown" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                  <label>العملة</label>
+                  <select id="stCurrency">
+                    <option value="EGP">EGP</option>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>رقم الملف</label>
+                  <input type="text" id="stFileCode" placeholder="رقم الملف...">
+                </div>
+              </div>
+              <div class="ssp-footer">
+                <button class="search-btn" onclick="runStatementSearch()">🔍 بحث</button>
+                <button class="print-btn" onclick="resetStatementFilters()">🔄 إعادة ضبط</button>
+              </div>
+            </div>
+
+            <div id="printableStatementArea">
+              <div class="pdf-report-header">
+                <h2>كشف حساب</h2>
+                <p id="pdfStatementSub">اسم الجهة: -</p>
+              </div>
+
+              <div class="statement-cards-row">
+                <div class="st-card debit">
+                  <div class="st-card-info">
+                    <span class="st-card-title">إجمالي مدين (الكشف)</span>
+                    <span class="st-card-val" id="stCardDebit" style="color:#16a34a;">0</span>
+                  </div>
+                  <div class="st-card-icon">↑</div>
+                </div>
+
+                <div class="st-card credit">
+                  <div class="st-card-info">
+                    <span class="st-card-title">إجمالي دائن (الكشف)</span>
+                    <span class="st-card-val" id="stCardCredit" style="color:#dc2626;">0</span>
+                  </div>
+                  <div class="st-card-icon">↓</div>
+                </div>
+
+                <div class="st-card balance">
+                  <div class="st-card-info">
+                    <span class="st-card-title">رصيد الكشف التراكمي</span>
+                    <span class="st-card-val" id="stCardBalance" style="color:#2563eb;">0</span>
+                  </div>
+                  <div class="st-card-icon">⚖</div>
+                </div>
+              </div>
+
+              <div class="statement-info-bar">
+                <div>🏢 الجهة الحالية: <span id="stInfoEntity" style="font-weight:800;">-</span></div>
+                <div>💲 العملة: <span id="stInfoCurrency" style="font-weight:800;">-</span></div>
+                <div>📅 النطاق: <span id="stInfoFromDate">الكل</span> إلى <span id="stInfoToDate">الآن</span></div>
+              </div>
+
+              <div class="table-wrapper">
+                <table class="running-table" id="statementRunningTable">
+                  <thead>
+                    <tr>
+                      <th style="width:130px;">📅 التاريخ</th>
+                      <th>📝 البيان</th>
+                      <th style="color:#4ade80; width:140px;">↑ مدين</th>
+                      <th style="color:#f87171; width:140px;">↓ دائن</th>
+                      <th style="color:#60a5fa; width:160px;">⚖ الرصيد</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statementRunningTbody">
+                    <tr><td colspan="5" style="text-align:center; color:#64748b;">قم باختيار الفندق/الجهة والضغط على (🔍 بحث) لعرض كشف الحساب</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:15px;" class="no-print">
+              <div class="btn-group" style="margin:0;">
+                <button class="excel-btn" onclick="exportStatementToExcel()">📊 تصدير Excel</button>
+                <button class="pdf-btn" onclick="downloadStatementPDF()">📄 حفظ PDF</button>
+                <button class="print-btn" onclick="window.print()">𖥕 طباعة</button>
+              </div>
+              <div style="font-size:13px; color:#64748b; font-weight:600;">عدد الحركات: <span id="stTotalCount">0</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= SETTLEMENT TAB (قسم تصفية الأوبريتور) ================= -->
+      <div id="settlementTab" class="tab-content">
+        <!-- 1. إضافة تصفية ملف -->
+        <div id="addSettlementSubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_settlement">إضافة تصفية ملف جديد</h3>
+          <div class="form-row">
+            <div class="form-group"><label>كود الملف (File Code)</label><input type="text" id="fileCode" placeholder="EG-2026-99"></div>
+            <div class="form-group"><label>اسم الأوبريتور</label><input type="text" id="guideName" placeholder="اسم الأوبريتور"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>إجمالي الإيرادات</label><input type="number" id="settlementRevenue" placeholder="الإيراد..." step="any"></div>
+            <div class="form-group"><label>إجمالي المصروفات</label><input type="number" id="settlementExpenses" placeholder="المصروف..." step="any"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>العملة</label><select id="settlementCurrency"><option value="USD">USD</option><option value="EGP">EGP</option></select></div>
+            <div class="form-group"><label>سعر الصرف</label><input type="number" id="settlementExchangeRate" placeholder="سعر الصرف..." step="any"></div>
+          </div>
+          <div class="form-group"><label>ملاحظات التصفية</label><textarea id="settlementNotes" placeholder="أي تفاصيل أو ملاحظات أصل التصفية..."></textarea></div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveSettlement" onclick="App.saveSettlement()">حفظ التصفية</button>
+          </div>
+
+          <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #cbd5e1;">
+            <h4 style="margin-bottom:10px; color:#0f172a;" data-i18n="h_import_settlement">📥 استيراد عدة تصفيات دفعة واحدة (ملف إكسيل)</h4>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">أعمدة الملف المطلوبة: <strong>كود الملف، اسم الأوبريتور، الإيرادات، المصروفات، ملاحظات</strong></p>
+            <input type="file" id="settlementExcelFile" accept=".xlsx,.xls" style="display:none;" onchange="App.importSettlementsFromExcel()">
+            <button class="excel-btn" id="btnImportSettlementExcel" onclick="document.getElementById('settlementExcelFile').click()">📥 اختيار ملف واستيراد</button>
+          </div>
+        </div>
+
+        <!-- 2. سجل تصفيات الملفات الجارية -->
+        <div id="settlementListSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_settlement_list">سجل تصفيات الملفات (الجارية)</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="print-btn" onclick="printSettlementsList()">🖨️ طباعة</button>
+              <button class="pdf-btn" onclick="downloadSettlementsPDF()">📄 PDF</button>
+              <button class="excel-btn" onclick="App.exportSettlementsList()">📊 Excel</button>
+              <input type="text" id="searchSettlements" placeholder="🔍 بحث..." onkeyup="filterSettlementsTable()" style="max-width:200px;">
+            </div>
+          </div>
+
+          <div class="filter-panel no-print" style="margin-bottom:15px;">
+            <div class="form-row" style="margin-bottom:0; align-items:center;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>👤 اختر الأوبريتور</label>
+                <select id="operatorFilterSelect" onchange="filterSettlementsTable()">
+                  <option value="">-- جميع الأوبريتورز / المرشدين --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="printableSettlementArea">
+            <div class="pdf-report-header">
+              <h2>تقرير تصفيات الأوبريتور والملفات</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+              <p id="settlementPrintFilter" style="font-weight:700; color:#ffffff; margin-top:6px;">جميع الأوبريتورز</p>
+            </div>
+
+            <div class="statement-cards-row" style="margin-bottom:15px;">
+              <div class="st-card commission">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي مبلغ العمولة الخاص بالتصفيات المعروضة</span>
+                  <span class="st-card-val" id="settlementTotalCommission" style="color:#16a34a;">0.00</span>
+                </div>
+                <div class="st-card-icon">💵</div>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table id="settlementsTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>كود الملف</th>
+                    <th>اسم الأوبريتور</th>
+                    <th>الإيرادات</th>
+                    <th>المصروفات</th>
+                    <th>الربح</th>
+                    <th>الصافي بعد الضريبة</th>
+                    <th>نسبة العموله</th>
+                    <th>مبلغ العموله</th>
+                    <th>ملاحظات</th>
+                    <th>التاريخ</th>
+                    <th class="no-print">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="settlementsTableBody">
+                  <tr><td colspan="12" style="text-align:center;">جاري التحميل...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. الأرشيف (التصفيات المعتمدة) -->
+        <div id="settlementArchiveSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_settlement_archive">📁 أرشيف التصفيات المعتمدة</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="print-btn" onclick="printArchiveSettlementsList()">🖨️ طباعة الأرشيف</button>
+              <button class="pdf-btn" onclick="downloadArchiveSettlementsPDF()">📄 PDF للأرشيف</button>
+              <button class="excel-btn" onclick="App.exportArchiveSettlementsList()">📊 تصدير Excel</button>
+              <input type="text" id="searchArchiveSettlements" placeholder="🔍 بحث بالأرشيف..." onkeyup="filterArchiveSettlementsTable()" style="max-width:200px;">
+            </div>
+          </div>
+
+          <div class="filter-panel no-print" style="margin-bottom:15px;">
+            <div class="form-row" style="margin-bottom:0; align-items:center;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label>👤 اختر الأوبريتور</label>
+                <select id="archiveOperatorFilterSelect" onchange="filterArchiveSettlementsTable()">
+                  <option value="">-- جميع الأوبريتورز / المرشدين --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="printableSettlementArchiveArea">
+            <div class="pdf-report-header">
+              <h2>تقرير أرشيف التصفيات المعتمدة</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+              <p id="archiveSettlementPrintFilter" style="font-weight:700; color:#ffffff; margin-top:6px;">جميع الأوبريتورز</p>
+            </div>
+
+            <div class="statement-cards-row" style="margin-bottom:15px;">
+              <div class="st-card commission">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي مبلغ العمولة الخاص بتصفيات الأرشيف المعروضة</span>
+                  <span class="st-card-val" id="archiveSettlementTotalCommission" style="color:#16a34a;">0.00</span>
+                </div>
+                <div class="st-card-icon">💵</div>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table id="settlementsArchiveTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>كود الملف</th>
+                    <th>اسم الأوبريتور</th>
+                    <th>الإيرادات</th>
+                    <th>المصروفات</th>
+                    <th>الربح</th>
+                    <th>الصافي بعد الضريبة</th>
+                    <th>نسبة العموله</th>
+                    <th>مبلغ العموله</th>
+                    <th>ملاحظات</th>
+                    <th>حالة الملف</th>
+                    <th>التاريخ</th>
+                    <th class="no-print">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="settlementsArchiveTableBody">
+                  <tr><td colspan="13" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= AVIATION TAB ================= -->
+      <div id="aviationTab" class="tab-content">
+        <div id="addAviationSubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_aviation">تسجيل حجز طيران جديد</h3>
+          <div class="form-row">
+            <div class="form-group"><label>نوع العملية</label><select id="aviationTransactionType"><option value="بيع">بيع</option><option value="رد">رد</option><option value="VOID">VOID</option></select></div>
+            <div class="form-group"><label>خط الطيران / الشركة</label><input type="text" id="airlineName" placeholder="مثال: مصر للطيران / طيران الإمارات"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>رقم PNR / كود الحجز</label><input type="text" id="pnrNumber" placeholder="مثال: X7YK9L"></div>
+            <div class="form-group"><label>رقم التذكرة</label><input type="text" id="aviationTicketNumber" placeholder="رقم التذكرة"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>اسم المسافر / العميل</label><input type="text" id="passengerName" placeholder="اسم الراكب"></div>
+            <div class="form-group"><label>رقم الملف (File Code)</label><input type="text" id="aviationFileCode" placeholder="EG-2026-10"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>تاريخ الإصدار</label><input type="date" id="aviationIssueDate"></div>
+            <div class="form-group"><label>الأوبريتور</label><input type="text" id="aviationOperator" placeholder="اسم الأوبريتور"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>عدد الأفراد</label><input type="number" id="aviationPassengersCount" placeholder="العدد" min="1"></div>
+            <div class="form-group">
+              <label>سعر البيع (EGP)</label>
+              <input type="number" id="aviationSellingPrice" placeholder="سعر البيع..." step="any">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>القيمة الفعلية (EGP)</label>
+              <input type="number" id="ticketCost" placeholder="المبلغ..." step="any">
+            </div>
+          </div>
+          <div class="form-group"><label>ملاحظات</label><textarea id="aviationNotes" placeholder="ملاحظات إضافية..."></textarea></div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveAviation" onclick="App.saveAviation()">حفظ الحجز</button>
+          </div>
+        </div>
+
+        <div id="aviationListSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_aviation_list">سجل حجوزات الطيران</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="pdf-btn" onclick="downloadAviationPDF()">📄 PDF</button>
+              <button class="excel-btn" onclick="App.exportAviationList()">📊 Excel</button>
+              <input type="text" id="searchAviation" placeholder="🔍 بحث..." onkeyup="filterAviationTable()" style="max-width:200px;">
+            </div>
+          </div>
+          <div id="printableAviationArea">
+            <div class="pdf-report-header">
+              <h2>تقرير حجوزات ومصروفات الطيران</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+            </div>
+            <div class="table-wrapper">
+              <table id="aviationTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>نوع العملية</th>
+                    <th>شركة الطيران</th>
+                    <th>PNR</th>
+                    <th>رقم التذكرة</th>
+                    <th>المسافر</th>
+                    <th>رقم الملف</th>
+                    <th>تاريخ الإصدار</th>
+                    <th>الأوبريتور</th>
+                    <th>عدد الأفراد</th>
+                    <th>سعر البيع</th>
+                    <th>عملة البيع</th>
+                    <th>إجمالي سعر البيع</th>
+                    <th>القيمة الفعلية</th>
+                    <th>العملة</th>
+                    <th>إجمالي القيمة الفعلية</th>
+                    <th>التاريخ</th>
+                    <th class="no-print">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="aviationTableBody">
+                  <tr><td colspan="18" style="text-align:center;">جاري التحميل...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="aviationCommissionSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_aviation_commission">عمولة حجوزات الطيران</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="excel-btn" onclick="App.exportAviationCommissionList()">📊 Excel</button>
+              <input type="text" id="searchAviationCommission" placeholder="🔍 بحث..." onkeyup="filterAviationCommissionTable()" style="max-width:200px;">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="aviationCommissionTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>نوع العملية</th>
+                  <th>شركة الطيران</th>
+                  <th>رقم الملف</th>
+                  <th>إجمالي سعر البيع</th>
+                  <th>إجمالي القيمة الفعلية</th>
+                  <th>صافي الربح</th>
+                  <th>نسبة العمولة</th>
+                  <th>قيمة العمولة</th>
+                </tr>
+              </thead>
+              <tbody id="aviationCommissionTableBody">
+                <tr><td colspan="9" style="text-align:center;">لا توجد بيانات</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TICKETS TAB ================= -->
+      <div id="ticketsTab" class="tab-content">
+        <div id="addTicketSubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_ticket">إضافة حركة تذاكر / مزارات</h3>
+          <div class="form-row">
+            <div class="form-group"><label>نوع الحركة <span style="color:red;">*</span></label><select id="ticketActionShared"><option value="اضافة">إضافة</option><option value="صرف">صرف</option></select></div>
+            <div class="form-group"><label>رقم الملف <span style="color:#94a3b8; font-size:12px;">(إلزامي في حالة الصرف فقط)</span></label><input type="text" id="ticketFileCodeShared" placeholder="EG-2026-10"></div>
+          </div>
+          <div class="form-group"><label>اسم المندوب / المرشد</label><input type="text" id="ticketGuideShared" placeholder="اسم المندوب أو المرشد"></div>
+
+          <div class="table-wrapper" style="margin-top:10px;">
+            <table id="ticketItemsTable">
+              <thead>
+                <tr>
+                  <th>اسم المزار والفعالية</th>
+                  <th>الكمية</th>
+                  <th>تاريخ الصلاحية</th>
+                </tr>
+              </thead>
+              <tbody id="ticketItemsTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="form-group" style="margin-top:15px;"><label>ملاحظات</label><textarea id="ticketNotesShared" placeholder="ملاحظات إضافية..."></textarea></div>
+
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveTicket" onclick="App.saveTicket()">حفظ التذاكر</button>
+          </div>
+
+          <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #cbd5e1;">
+            <h4 style="margin-bottom:10px; color:#0f172a;" data-i18n="h_import_tickets">📥 استيراد عدة مزارات دفعة واحدة (ملف إكسيل)</h4>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;">أعمدة الملف المطلوبة: <strong>اسم المزار، الكمية</strong> — سيتم تعبئة خانة الكمية تلقائيًا لكل مزار مطابق في الجدول أعلاه</p>
+            <input type="file" id="ticketExcelFile" accept=".xlsx,.xls" style="display:none;" onchange="App.importTicketRowsFromExcel()">
+            <button class="excel-btn" id="btnImportTicketsExcel" onclick="document.getElementById('ticketExcelFile').click()">📥 اختيار ملف واستيراد</button>
+          </div>
+        </div>
+
+        <div id="ticketsListSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_tickets_list">سجل مخزون التذاكر والمزارات</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="print-btn" onclick="window.print()">🖨️ طباعة</button>
+              <button class="pdf-btn" onclick="downloadTicketsPDF()">📄 PDF</button>
+              <button class="excel-btn" onclick="App.exportTicketsList()">📊 Excel</button>
+            </div>
+          </div>
+          <div class="btn-group no-print" style="margin:0 0 15px; flex-wrap:wrap;">
+            <input type="text" id="searchTicketsGuide" placeholder="🔍 بحث باسم المندوب/المرشد..." onkeyup="filterTicketsTable()" style="max-width:200px;">
+            <input type="text" id="searchTicketsFileCode" placeholder="🔍 بحث برقم الملف..." onkeyup="filterTicketsTable()" style="max-width:160px;">
+          </div>
+          <div id="printableTicketsArea">
+            <div class="pdf-report-header">
+              <h2>تقرير جرد ومخزون تذاكر المزارات</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+            </div>
+            <div class="table-wrapper">
+              <table id="ticketsTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>الحركة</th>
+                    <th>رقم الملف</th>
+                    <th>اسم المزار</th>
+                    <th>المندوب/المرشد</th>
+                    <th>الكمية</th>
+                    <th>تاريخ الصلاحية</th>
+                    <th>الملاحظات</th>
+                    <th>التاريخ</th>
+                    <th class="no-print">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="ticketsTableBody">
+                  <tr><td colspan="10" style="text-align:center;">جاري التحميل...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="ticketsBalanceSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_tickets_balance">أرصدة التذاكر (المخزون المتبقي لكل مزار)</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <button class="print-btn" onclick="window.print()">🖨️ طباعة</button>
+              <button class="pdf-btn" onclick="downloadTicketsBalancePDF()">📄 PDF</button>
+              <button class="excel-btn" onclick="App.exportTicketsBalance()">📊 Excel</button>
+              <input type="text" id="searchTicketsBalance" placeholder="🔍 بحث عن مزار..." onkeyup="filterTicketsBalanceTable()" style="max-width:200px;">
+            </div>
+          </div>
+          <div id="printableTicketsBalanceArea">
+            <div class="pdf-report-header">
+              <h2>تقرير أرصدة مخزون التذاكر</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+            </div>
+            <div class="table-wrapper">
+              <table id="ticketsBalanceTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>اسم المزار / الفعالية</th>
+                    <th>إجمالي الإضافة</th>
+                    <th>إجمالي الصرف</th>
+                    <th>إجمالي التذاكر منتهية الصلاحية</th>
+                    <th>الرصيد المتبقي</th>
+                  </tr>
+                </thead>
+                <tbody id="ticketsBalanceTableBody">
+                  <tr><td colspan="6" style="text-align:center;">لا توجد بيانات</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="shopsTab" class="tab-content">
+        <div id="addShopDirectorySubTab" class="sub-tab-content active">
+          <h3 data-i18n="h_add_shop_directory">تسجيل محل جديد</h3>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_shop_name">اسم المحل</label><input type="text" id="shopDirName" placeholder="اسم المحل" data-i18n-placeholder="lbl_shop_name"></div>
+            <div class="form-group"><label data-i18n="lbl_region">المنطقة</label>
+              <select id="shopDirRegion">
+                <option value="الجيزة" data-i18n="opt_region_giza">الجيزة</option>
+                <option value="مصر القديمة" data-i18n="opt_region_old_cairo">مصر القديمة</option>
+                <option value="أسوان" data-i18n="opt_region_aswan">أسوان</option>
+                <option value="الأقصر" data-i18n="opt_region_luxor">الأقصر</option>
+                <option value="أخرى" data-i18n="opt_region_other">أخرى</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label>
+              <select id="shopDirType">
+                <option value="بردي" data-i18n="opt_shop_papyrus">بردي</option>
+                <option value="بازار" data-i18n="opt_shop_bazaar">بازار</option>
+                <option value="قطن" data-i18n="opt_shop_cotton">قطن</option>
+                <option value="ريحه" data-i18n="opt_shop_perfume">ريحة</option>
+                <option value="حجر" data-i18n="opt_shop_stone">حجر</option>
+                <option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option>
+                <option value="أخرى" data-i18n="opt_region_other">أخرى</option>
+              </select>
+            </div>
+            <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="shopDirCommission" placeholder="النسبة %" data-i18n-placeholder="ph_commission" step="any" min="0" max="100"></div>
+          </div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveShopDirectory" onclick="App.saveShopDirectory()" data-i18n="btn_save_shop">حفظ المحل</button>
+          </div>
+          <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #cbd5e1;">
+            <h4 style="margin-bottom:10px; color:#0f172a;" data-i18n="h_seed_shops">📥 استيراد القائمة الأساسية للمحلات</h4>
+            <p style="font-size:13px; color:#64748b; margin-bottom:12px;" data-i18n="p_seed_shops">استيراد قائمة المحلات الجاهزة (27 محل) دفعة واحدة. المحلات المُضافة مسبقًا بنفس الاسم لن تتكرر.</p>
+            <button class="excel-btn" id="btnSeedShops" onclick="App.seedDefaultShops()" data-i18n="btn_seed_shops">📥 استيراد القائمة الأساسية</button>
+          </div>
+        </div>
+
+        <div id="shopDirectoryListSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_shop_directory_list">دليل المحلات</h3>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="text" id="searchShopDirectory" placeholder="🔍 بحث..." data-i18n-placeholder="ph_search" onkeyup="filterShopDirectoryTable()" style="max-width:200px;">
+              <button class="excel-btn" onclick="App.exportShopDirectoryList()" data-i18n="btn_excel">📊 Excel</button>
+            </div>
+          </div>
+          <div class="table-wrapper"><table id="shopDirectoryTable"><thead><tr><th>#</th><th data-i18n="lbl_shop_name">اسم المحل</th><th data-i18n="lbl_region">المنطقة</th><th data-i18n="lbl_shop_type">نوع المحل</th><th data-i18n="lbl_commission">العمولة</th><th data-i18n="lbl_actions">إجراءات</th></tr></thead><tbody id="shopDirectoryTableBody"><tr><td colspan="6" style="text-align:center;" data-i18n="msg_loading">جاري التحميل...</td></tr></tbody></table></div>
+        </div>
+
+        <div id="addShopSubTab" class="sub-tab-content">
+          <h3 data-i18n="h_add_shop">تسجيل حركة مع محل</h3>
+          <div class="form-row">
+            <div class="form-group" style="position:relative;">
+              <label data-i18n="lbl_shop_name">اسم المحل</label>
+              <input type="text" id="shopEntity" placeholder="أدخل اسم المحل..." data-i18n-placeholder="ph_shop_name" autocomplete="off" oninput="searchShopEntitySuggestions()" onfocus="searchShopEntitySuggestions()" onchange="applyShopAutoFill(this.value)">
+              <div id="shopEntitySuggestions" class="suggestions-dropdown" style="display:none;"></div>
+            </div>
+            <div class="form-group"><label data-i18n="lbl_guide_name">اسم المرشد</label><input type="text" id="shopGuideName" placeholder="أدخل اسم المرشد..." data-i18n-placeholder="ph_guide_name"></div>
+            <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label><select id="shopShopType"><option value="" data-i18n="opt_select_type">-- اختر النوع --</option><option value="بردي" data-i18n="opt_shop_papyrus">بردي</option><option value="بازار" data-i18n="opt_shop_bazaar">بازار</option><option value="قطن" data-i18n="opt_shop_cotton">قطن</option><option value="ريحه" data-i18n="opt_shop_perfume">ريحه</option><option value="حجر" data-i18n="opt_shop_stone">حجر</option><option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option><option value="أخرى" data-i18n="opt_region_other">أخرى</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_file_code">رقم الملف</label><input type="text" id="shopFileCode" placeholder="أدخل رقم الملف..." data-i18n-placeholder="ph_file_code"></div>
+            <div class="form-group"><label data-i18n="lbl_period">الفترة</label>
+              <select id="shopPeriod">
+                <option value="الفترة الأولى" data-i18n="period_1">الفترة الأولى</option>
+                <option value="الفترة الثانية" data-i18n="period_2">الفترة الثانية</option>
+                <option value="الفترة الثالثة" data-i18n="period_3">الفترة الثالثة</option>
+                <option value="الفترة الرابعة" data-i18n="period_4">الفترة الرابعة</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label data-i18n="lbl_transaction_type">نوع الحركة</label><select id="shopType" onchange="onShopTypeChange()"><option value="deposit" data-i18n="opt_debit">مدين (لنا)</option><option value="deduction" data-i18n="opt_credit">دائن (المحصل)</option></select></div>
+            <div class="form-group">
+              <label data-i18n="lbl_amount_currency">المبلغ والعملة</label>
+              <div class="amount-input-group">
+                <input type="number" id="shopAmount" placeholder="أدخل المبلغ..." data-i18n-placeholder="ph_amount" step="any" inputmode="decimal">
+                <select id="shopCurrency">
+                  <option value="EGP">EGP</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="shopCommission" placeholder="النسبة %" data-i18n-placeholder="ph_commission" step="any" min="0" max="100"></div>
+          </div>
+          <div class="form-group"><label data-i18n="lbl_description">البيان</label><textarea id="shopDescription" placeholder="تفاصيل الحركة..." data-i18n-placeholder="ph_transaction_details"></textarea></div>
+          <div class="btn-group">
+            <button class="submit-btn" id="btnSaveShop" onclick="App.saveShop()" data-i18n="btn_save_transaction">تسجيل الحركة</button>
+          </div>
+        </div>
+
+        <div id="shopRecordsSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3 data-i18n="h_shop_records">سجل عمليات المحلات</h3>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="text" id="searchShop" placeholder="🔍 بحث..." data-i18n-placeholder="ph_search" onkeyup="filterShopsTable()" style="max-width:200px;">
+              <button class="excel-btn" onclick="App.exportShopsList()" data-i18n="btn_excel">📊 Excel</button>
+            </div>
+          </div>
+          <div class="table-wrapper"><table id="shopsTable"><thead><tr><th>#</th><th data-i18n="lbl_shop">المحل</th><th data-i18n="lbl_guide_name">اسم المرشد</th><th data-i18n="lbl_shop_type">نوع المحل</th><th data-i18n="lbl_file_code">رقم الملف</th><th data-i18n="lbl_period">الفترة</th><th data-i18n="lbl_type">النوع</th><th data-i18n="lbl_amount">المبلغ</th><th data-i18n="lbl_currency">العملة</th><th data-i18n="lbl_commission">العمولة</th><th data-i18n="lbl_commission_amount">مبلغ العمولة</th><th data-i18n="lbl_status">الحالة</th><th data-i18n="lbl_description">البيان</th><th data-i18n="lbl_date">التاريخ</th><th data-i18n="lbl_actions">إجراءات</th></tr></thead><tbody id="shopsTableBody"><tr><td colspan="15" style="text-align:center;" data-i18n="msg_loading">جاري التحميل...</td></tr></tbody></table></div>
+        </div>
+
+        <div id="shopSummarySubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h3 data-i18n="h_shop_summary">ملخص Dashboard المحلات</h3>
+            <div class="btn-group no-print" style="margin:0;"><button class="print-btn" onclick="printDashboard()" data-i18n="btn_print">𖥕 طباعة</button><button class="pdf-btn" onclick="downloadShopsDashboardPDF()" data-i18n="btn_pdf">📄 PDF</button></div>
+          </div>
+          <div id="printableShopsArea">
+            <div class="pdf-report-header">
+              <h2 data-i18n="report_shops_h2">تقرير ملخص أرصدة المحلات</h2>
+              <p data-i18n="dash_report_p">منظومة الحسابات السياحية الشاملة</p>
+            </div>
+            <div class="dashboard-grid">
+              <div class="dash-card" style="border-right:4px solid #16a34a;background:#f0fdf4;"><span class="dash-card-title" style="color:#166534;" data-i18n="lbl_total_debit">إجمالي المدين</span><div class="dash-card-value currency-breakdown" id="shopDashTotalDeposits" style="color:#15803d;">0</div></div>
+              <div class="dash-card" style="border-right:4px solid #dc2626;background:#fef2f2;"><span class="dash-card-title" style="color:#991b1b;" data-i18n="lbl_total_credit">إجمالي الدائن</span><div class="dash-card-value currency-breakdown" id="shopDashTotalDeductions" style="color:#b91c1c;">0</div></div>
+              <div class="dash-card" style="border-right:4px solid #0284c7;background:#f0f9ff;"><span class="dash-card-title" style="color:#075985;" data-i18n="lbl_net_balance">صافي الرصيد</span><div class="dash-card-value currency-breakdown" id="shopDashNetBalance" style="color:#0369a1;">0</div></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px;"><h4 data-i18n="h_cumulative_summary">ملخص الأرصدة التجميعي</h4><input type="text" id="searchShopSummary" class="no-print" placeholder="🔍 بحث..." data-i18n-placeholder="ph_search" onkeyup="filterShopSummaryTable()" style="max-width:200px;"></div>
+            <div class="table-wrapper"><table id="shopSummaryTable"><thead><tr><th>#</th><th data-i18n="lbl_shop">المحل</th><th data-i18n="lbl_currency">العملة</th><th data-i18n="lbl_total_debit">إجمالي المدين</th><th data-i18n="lbl_total_credit">إجمالي الدائن</th><th data-i18n="lbl_net_balance">صافي الرصيد</th><th data-i18n="lbl_status">الحالة</th></tr></thead><tbody id="shopSummaryTableBody"><tr><td colspan="7" style="text-align:center;" data-i18n="msg_calculating">جاري الحساب...</td></tr></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<!-- Modal تعديل المورد -->
+<div id="editSupplierModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_supplier">تعديل المورد</h3>
+    <input type="hidden" id="editSupplierId">
+    <div class="form-group"><label data-i18n="lbl_type">النوع</label><select id="editSupplierType"><option value="فندق" data-i18n="opt_hotel">فندق</option><option value="كروز" data-i18n="opt_cruise">كروز</option><option value="مطعم" data-i18n="opt_restaurant">مطعم</option></select></div>
+    <div class="form-group"><label data-i18n="lbl_name">الاسم</label><input type="text" id="editPropertyName"></div>
+    <div class="form-group"><label data-i18n="lbl_supplier_name">اسم المورد</label><input type="text" id="editSupplierName"></div>
+    <div class="form-group"><label data-i18n="lbl_tax_number">الرقم الضريبي</label><input type="text" id="editTaxCardNumber"></div>
+    <div class="form-group"><label data-i18n="lbl_tax_status">حالة الضريبة</label><select id="editTaxType"><option value="0.03" data-i18n="opt_taxed_3_short">خاضع 3%</option><option value="advance_payment" data-i18n="opt_advance_payment">دفعات مقدمة</option></select></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedSupplier()" data-i18n="btn_save_edits">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeEditModal()" data-i18n="btn_cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تعديل الطيران -->
+<div id="editAviationModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_aviation">تعديل حجز الطيران</h3>
+    <input type="hidden" id="editAviationId">
+    <div class="form-group"><label>نوع العملية</label><select id="editAviationTransactionType"><option value="بيع">بيع</option><option value="رد">رد</option><option value="VOID">VOID</option></select></div>
+    <div class="form-group"><label>خط الطيران</label><input type="text" id="editAirlineName"></div>
+    <div class="form-group"><label>PNR</label><input type="text" id="editPnrNumber"></div>
+    <div class="form-group"><label>رقم التذكرة</label><input type="text" id="editAviationTicketNumber"></div>
+    <div class="form-group"><label>اسم المسافر</label><input type="text" id="editPassengerName"></div>
+    <div class="form-group"><label>رقم الملف</label><input type="text" id="editAviationFileCode"></div>
+    <div class="form-group"><label>تاريخ الإصدار</label><input type="date" id="editAviationIssueDate"></div>
+    <div class="form-group"><label>الأوبريتور</label><input type="text" id="editAviationOperator"></div>
+    <div class="form-group"><label>عدد الأفراد</label><input type="number" id="editAviationPassengersCount" min="1"></div>
+    <div class="form-group">
+      <label>سعر البيع (EGP)</label>
+      <input type="number" id="editAviationSellingPrice" step="any">
+    </div>
+    <div class="form-group">
+      <label>القيمة الفعلية (EGP)</label>
+      <input type="number" id="editTicketCost" step="any">
+    </div>
+    <div class="form-group"><label>ملاحظات</label><textarea id="editAviationNotes"></textarea></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedAviation()">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeAviationEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تعديل التذاكر -->
+<div id="editTicketModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_ticket">تعديل تذكرة المزار</h3>
+    <input type="hidden" id="editTicketId">
+    <div class="form-row">
+      <div class="form-group"><label>نوع الحركة <span style="color:red;">*</span></label><select id="editTicketAction"><option value="اضافة">إضافة</option><option value="صرف">صرف</option></select></div>
+      <div class="form-group"><label>رقم الملف <span style="color:#94a3b8; font-size:12px;">(إلزامي في حالة الصرف فقط)</span></label><input type="text" id="editTicketFileCode"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>اسم المزار</label><select id="editTicketName"></select></div>
+      <div class="form-group"><label>اسم المندوب / المرشد</label><input type="text" id="editTicketGuide"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>الكمية</label><input type="number" id="editTicketQty"></div>
+      <div class="form-group"><label>تاريخ الصلاحية</label><input type="date" id="editTicketExpiry"></div>
+    </div>
+    <div class="form-group"><label>ملاحظات</label><textarea id="editTicketNotes"></textarea></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedTicket()">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeTicketEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تعديل التصفية -->
+<div id="editSettlementModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_settlement">تعديل تصفية الملف</h3>
+    <input type="hidden" id="editSettlementId">
+    <div class="form-group"><label>كود الملف</label><input type="text" id="editFileCode"></div>
+    <div class="form-group"><label>اسم الأوبريتور</label><input type="text" id="editGuideName"></div>
+    <div class="form-group"><label>الإيرادات</label><input type="number" id="editSettlementRevenue" step="any"></div>
+    <div class="form-group"><label>المصروفات</label><input type="number" id="editSettlementExpenses" step="any"></div>
+    <div class="form-group"><label>العملة</label><select id="editSettlementCurrency"><option value="USD">USD</option><option value="EGP">EGP</option></select></div>
+    <div class="form-group"><label>سعر الصرف</label><input type="number" id="editSettlementExchangeRate" step="any"></div>
+    <div class="form-group"><label>ملاحظات</label><textarea id="editSettlementNotes"></textarea></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedSettlement()">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeSettlementEditModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تعديل محل -->
+<div id="editShopDirectoryModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_shop_directory">تعديل المحل</h3>
+    <input type="hidden" id="editShopDirId">
+    <div class="form-group"><label data-i18n="lbl_shop_name">اسم المحل</label><input type="text" id="editShopDirName"></div>
+    <div class="form-group"><label data-i18n="lbl_region">المنطقة</label>
+      <select id="editShopDirRegion">
+        <option value="الجيزة">الجيزة</option>
+        <option value="مصر القديمة">مصر القديمة</option>
+        <option value="أسوان">أسوان</option>
+        <option value="الأقصر">الأقصر</option>
+        <option value="أخرى">أخرى</option>
+      </select>
+    </div>
+    <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label>
+      <select id="editShopDirType">
+        <option value="بردي">بردي</option>
+        <option value="بازار">بازار</option>
+        <option value="قطن">قطن</option>
+        <option value="ريحة">ريحة</option>
+        <option value="حجر">حجر</option>
+        <option value="سجاد">سجاد</option>
+        <option value="أخرى">أخرى</option>
+      </select>
+    </div>
+    <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="editShopDirCommission" step="any" min="0" max="100"></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedShopDirectory()" data-i18n="btn_save_edits">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeShopDirectoryEditModal()" data-i18n="btn_cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TOURISM SCREEN (EMPLOYEE VIEW) ================= -->
+<div id="tourismScreen" style="display:none;">
+  <div class="header">
+    <div class="header-brand-wrap">
+      <div class="company-brand">
+        <img src="logo.jpg" alt="LOOK ATEGYPT TOURS" class="header-logo">
+        <span class="company-tagline">The Luxury DMC of Egypt</span>
+      </div>
+      <div class="company-divider"></div>
+      <h2 data-i18n="tourism_header_title">🌍 منظومة السياحة</h2>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="user-email" data-i18n="tourism_header_subtitle">واجهة الموظفين — عرض فقط</div>
+      <button id="tourismLangToggleBtn" onclick="toggleLanguage()" style="background:#ffffff22; color:#fff; border:1px solid #ffffff55; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;">EN</button>
+      <button onclick="exitTourism()" data-i18n="tourism_exit" style="background:#dc2626; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700; cursor:pointer;">🚪 خروج</button>
+    </div>
+  </div>
+
+  <div class="tourism-layout">
+    <div class="tourism-subtabs">
+      <button class="sub-tab-btn active" onclick="openTourismSubTab(event, 'tourismTicketsBalanceSubTab')" data-i18n="tourism_sub_tickets_balance">🎟️ أرصدة التذاكر</button>
+      <button class="sub-tab-btn" onclick="openTourismSubTab(event, 'tourismCreditSummarySubTab')" data-i18n="tourism_sub_credit_summary">💳 أرصدة الكريديت</button>
+    </div>
+
+    <div class="tourism-content-area">
+      <!-- أرصدة التذاكر -->
+      <div id="tourismTicketsBalanceSubTab" class="tourism-subtab-content active">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+          <h3 data-i18n="h_tickets_balance">أرصدة التذاكر (المخزون المتبقي لكل مزار)</h3>
+          <div class="btn-group no-print" style="margin:0;">
+            <button class="print-btn" onclick="window.print()">🖨️ طباعة</button>
+            <button class="pdf-btn" onclick="downloadTicketsBalancePDF()">📄 PDF</button>
+            <button class="excel-btn" onclick="App.exportTourismTicketsBalance()">📊 Excel</button>
+            <input type="text" id="searchTourismTicketsBalance" placeholder="🔍 بحث عن مزار..." onkeyup="filterTourismTicketsBalanceTable()" style="max-width:200px;">
+          </div>
+        </div>
+        <div id="printableTourismTicketsBalanceArea">
+          <div class="pdf-report-header">
+            <h2>تقرير أرصدة مخزون التذاكر</h2>
+            <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+          </div>
+          <div class="table-wrapper">
+            <table id="tourismTicketsBalanceTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>اسم المزار / الفعالية</th>
+                  <th>إجمالي الإضافة</th>
+                  <th>إجمالي الصرف</th>
+                  <th>إجمالي التذاكر منتهية الصلاحية</th>
+                  <th>الرصيد المتبقي</th>
+                </tr>
+              </thead>
+              <tbody id="tourismTicketsBalanceTableBody">
+                <tr><td colspan="6" style="text-align:center;">لا توجد بيانات</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- الملخص والداش بورد (الكريديت) -->
+      <div id="tourismCreditSummarySubTab" class="tourism-subtab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+          <h3 data-i18n="h_credit_summary">ملخص Dashboard الكريديت</h3>
+          <div class="btn-group no-print" style="margin:0;">
+            <button class="print-btn" onclick="printTourismDashboard()">🖨️ طباعة</button>
+            <button class="pdf-btn" onclick="downloadTourismDashboardPDF()">📄 PDF</button>
+          </div>
+        </div>
+        <div id="printableTourismArea">
+          <div class="pdf-report-header">
+            <h2>تقرير ملخص أرصدة الكريديت</h2>
+            <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+          </div>
+          <div class="dashboard-grid">
+            <div class="dash-card" style="border-right:4px solid #16a34a;background:#f0fdf4;"><span class="dash-card-title" style="color:#166534;">إجمالي المدين</span><div class="dash-card-value currency-breakdown" id="tourismDashTotalDeposits" style="color:#15803d;">0</div></div>
+            <div class="dash-card" style="border-right:4px solid #dc2626;background:#fef2f2;"><span class="dash-card-title" style="color:#991b1b;">إجمالي الدائن</span><div class="dash-card-value currency-breakdown" id="tourismDashTotalDeductions" style="color:#b91c1c;">0</div></div>
+            <div class="dash-card" style="border-right:4px solid #0284c7;background:#f0f9ff;"><span class="dash-card-title" style="color:#075985;">صافي الرصيد</span><div class="dash-card-value currency-breakdown" id="tourismDashNetBalance" style="color:#0369a1;">0</div></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; margin-bottom:10px;"><h4>ملخص الأرصدة التجميعي</h4><input type="text" id="searchTourismEntitySummary" class="no-print" placeholder="🔍 بحث..." onkeyup="filterTourismEntitySummaryTable()" style="max-width:200px;"></div>
+          <div class="table-wrapper"><table id="tourismEntitySummaryTable"><thead><tr><th>#</th><th>الجهة</th><th>العملة</th><th>إجمالي المدين</th><th>إجمالي الدائن</th><th>صافي الرصيد</th><th>الحالة</th></tr></thead><tbody id="tourismEntitySummaryTableBody"><tr><td colspan="7" style="text-align:center;">جاري الحساب...</td></tr></tbody></table></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal تفاصيل حركة الحساب (قسم السياحة) ================= -->
+<div id="tourismEntityDetailsModal" class="modal-overlay">
+  <div class="modal-content" style="max-width:920px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; flex-wrap:wrap;">
+      <h3 id="tourismEntityDetailsTitle" style="margin:0; color:#0f172a;">تفاصيل حركة الحساب</h3>
+      <button class="print-btn" onclick="App.closeTourismEntityDetails()" style="margin:0;">✖ إغلاق</button>
+    </div>
+    <div id="tourismEntityDetailsSummary" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;"></div>
+    <div class="table-wrapper">
+      <table id="tourismEntityDetailsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>رقم الملف</th>
+            <th>الوصول</th>
+            <th>المغادرة</th>
+            <th>النوع</th>
+            <th>المبلغ</th>
+            <th>العملة</th>
+            <th>البيان</th>
+            <th>التاريخ</th>
+          </tr>
+        </thead>
+        <tbody id="tourismEntityDetailsTableBody">
+          <tr><td colspan="9" style="text-align:center;">لا توجد بيانات</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LANGUAGE / TRANSLATION SYSTEM ================= -->
+<script src="i18n.js"></script>
+
+<!-- ================= NAVIGATION & GLOBAL JS ================= -->
+<script src="helpers.js"></script>
+
+<!-- ================= JAVASCRIPT LOGIC ================= -->
+<script type="module" src="app.js"></script>
+</body>
+</html>
