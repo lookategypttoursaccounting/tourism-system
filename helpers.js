@@ -555,6 +555,8 @@
     document.getElementById('stEntityName').value = '';
     document.getElementById('stFileCode').value = '';
     document.getElementById('statementRunningTbody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">قم باختيار الفندق/الجهة والضغط على (🔍 بحث) لعرض كشف الحساب</td></tr>';
+    const wrap = document.getElementById('statementResultsWrap');
+    if (wrap) wrap.style.display = 'none';
   }
   // فتح/إغلاق قائمة البحث المنسدلة في صفحة كشف الحساب
   function toggleStatementSearchPanel() {
@@ -704,6 +706,9 @@
     const fileCode = document.getElementById('stFileCode').value.trim().toLowerCase();
 
     if (!entity) { alert('يرجى اختيار اسم الجهة أو الفندق أولاً'); return; }
+
+    const stWrap = document.getElementById('statementResultsWrap');
+    if (stWrap) stWrap.style.display = 'block';
 
     document.getElementById('stInfoEntity').innerText = entity;
     document.getElementById('stInfoCurrency').innerText = currency;

@@ -342,13 +342,6 @@
 
         <div id="creditStatementSubTab" class="sub-tab-content">
           <div class="statement-container">
-            <div class="statement-header-banner">
-              <div>
-                <h2 style="margin:0; font-size:24px;">📄 كشف الحساب التفصيلي المستقل</h2>
-                <span style="opacity:0.85; font-size:14px;">يقرأ الموردين المسجلين في حركات الكريديت فقط</span>
-              </div>
-            </div>
-
             <div class="statement-search-bar no-print">
               <button class="search-btn statement-search-toggle" id="statementSearchToggleBtn" onclick="toggleStatementSearchPanel()">🔍 بحث</button>
             </div>
@@ -380,6 +373,14 @@
               <div class="ssp-footer">
                 <button class="search-btn" onclick="runStatementSearch()">🔍 بحث</button>
                 <button class="print-btn" onclick="resetStatementFilters()">🔄 إعادة ضبط</button>
+              </div>
+            </div>
+
+            <div id="statementResultsWrap" style="display:none;">
+            <div class="statement-header-banner">
+              <div>
+                <h2 style="margin:0; font-size:24px;">📄 كشف الحساب التفصيلي المستقل</h2>
+                <span style="opacity:0.85; font-size:14px;">يقرأ الموردين المسجلين في حركات الكريديت فقط</span>
               </div>
             </div>
 
@@ -447,6 +448,8 @@
               </div>
               <div style="font-size:13px; color:#64748b; font-weight:600;">عدد الحركات: <span id="stTotalCount">0</span></div>
             </div>
+            </div>
+            <!-- /#statementResultsWrap -->
 
           </div>
         </div>
