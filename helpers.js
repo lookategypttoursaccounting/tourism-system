@@ -137,6 +137,8 @@
     const login = document.getElementById('loginScreen');
     const app = document.getElementById('appScreen');
     const tourism = document.getElementById('tourismScreen');
+    const tourismModal = document.getElementById('tourismEntityDetailsModal');
+    if (tourismModal) tourismModal.style.display = 'none';
     if (app) app.style.display = 'none';
     if (tourism) tourism.style.display = 'none';
     if (login) login.style.display = 'flex';
@@ -155,6 +157,8 @@
     const login = document.getElementById('loginScreen');
     const app = document.getElementById('appScreen');
     const tourism = document.getElementById('tourismScreen');
+    const tourismModal = document.getElementById('tourismEntityDetailsModal');
+    if (tourismModal) tourismModal.style.display = 'none';
     if (login) login.style.display = 'none';
     if (app) app.style.display = 'none';
     if (tourism) tourism.style.display = 'block';
@@ -166,6 +170,8 @@
     const role = sessionStorage.getItem('authRole');
     sessionStorage.removeItem('tourismMode');
     const tourism = document.getElementById('tourismScreen');
+    const tourismModal = document.getElementById('tourismEntityDetailsModal');
+    if (tourismModal) tourismModal.style.display = 'none';
     if (tourism) tourism.style.display = 'none';
     if (role === 'admin') {
       // المدير كان في وضع المعاينة -> يرجع لواجهة الإدارة
