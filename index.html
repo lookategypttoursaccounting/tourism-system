@@ -874,6 +874,7 @@
                 <option value="ريحه" data-i18n="opt_shop_perfume">ريحة</option>
                 <option value="حجر" data-i18n="opt_shop_stone">حجر</option>
                 <option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option>
+                <option value="توابل" data-i18n="opt_shop_spice">توابل</option>
                 <option value="أخرى" data-i18n="opt_region_other">أخرى</option>
               </select>
             </div>
@@ -909,7 +910,7 @@
               <div id="shopEntitySuggestions" class="suggestions-dropdown" style="display:none;"></div>
             </div>
             <div class="form-group"><label data-i18n="lbl_guide_name">اسم المرشد</label><input type="text" id="shopGuideName" placeholder="أدخل اسم المرشد..." data-i18n-placeholder="ph_guide_name"></div>
-            <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label><select id="shopShopType"><option value="" data-i18n="opt_select_type">-- اختر النوع --</option><option value="بردي" data-i18n="opt_shop_papyrus">بردي</option><option value="بازار" data-i18n="opt_shop_bazaar">بازار</option><option value="قطن" data-i18n="opt_shop_cotton">قطن</option><option value="ريحه" data-i18n="opt_shop_perfume">ريحه</option><option value="حجر" data-i18n="opt_shop_stone">حجر</option><option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option><option value="أخرى" data-i18n="opt_region_other">أخرى</option></select></div>
+            <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label><select id="shopShopType"><option value="" data-i18n="opt_select_type">-- اختر النوع --</option><option value="بردي" data-i18n="opt_shop_papyrus">بردي</option><option value="بازار" data-i18n="opt_shop_bazaar">بازار</option><option value="قطن" data-i18n="opt_shop_cotton">قطن</option><option value="ريحه" data-i18n="opt_shop_perfume">ريحه</option><option value="حجر" data-i18n="opt_shop_stone">حجر</option><option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option><option value="توابل" data-i18n="opt_shop_spice">توابل</option><option value="أخرى" data-i18n="opt_region_other">أخرى</option></select></div>
           </div>
           <div class="form-row">
             <div class="form-group"><label data-i18n="lbl_file_code">رقم الملف</label><input type="text" id="shopFileCode" placeholder="أدخل رقم الملف..." data-i18n-placeholder="ph_file_code"></div>
@@ -1094,6 +1095,7 @@
         <option value="ريحة">ريحة</option>
         <option value="حجر">حجر</option>
         <option value="سجاد">سجاد</option>
+        <option value="توابل">توابل</option>
         <option value="أخرى">أخرى</option>
       </select>
     </div>
@@ -1101,6 +1103,69 @@
     <div class="btn-group" style="justify-content:flex-end;">
       <button class="submit-btn" onclick="App.saveEditedShopDirectory()" data-i18n="btn_save_edits">حفظ التعديلات</button>
       <button class="print-btn" onclick="App.closeShopDirectoryEditModal()" data-i18n="btn_cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تعديل حركة محل -->
+<div id="editShopModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 data-i18n="h_edit_shop">تعديل حركة المحل</h3>
+    <input type="hidden" id="editShopId">
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="lbl_shop_name">اسم المحل</label><input type="text" id="editShopEntity"></div>
+      <div class="form-group"><label data-i18n="lbl_guide_name">اسم المرشد</label><input type="text" id="editShopGuideName"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label>
+        <select id="editShopShopType">
+          <option value="" data-i18n="opt_select_type">-- اختر النوع --</option>
+          <option value="بردي" data-i18n="opt_shop_papyrus">بردي</option>
+          <option value="بازار" data-i18n="opt_shop_bazaar">بازار</option>
+          <option value="قطن" data-i18n="opt_shop_cotton">قطن</option>
+          <option value="ريحه" data-i18n="opt_shop_perfume">ريحه</option>
+          <option value="حجر" data-i18n="opt_shop_stone">حجر</option>
+          <option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option>
+          <option value="توابل" data-i18n="opt_shop_spice">توابل</option>
+          <option value="أخرى" data-i18n="opt_region_other">أخرى</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="lbl_file_code">رقم الملف</label><input type="text" id="editShopFileCode"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label data-i18n="lbl_period">الفترة</label>
+        <select id="editShopPeriod">
+          <option value="الفترة الأولى" data-i18n="period_1">الفترة الأولى</option>
+          <option value="الفترة الثانية" data-i18n="period_2">الفترة الثانية</option>
+          <option value="الفترة الثالثة" data-i18n="period_3">الفترة الثالثة</option>
+          <option value="الفترة الرابعة" data-i18n="period_4">الفترة الرابعة</option>
+        </select>
+      </div>
+      <div class="form-group"><label data-i18n="lbl_transaction_type">نوع الحركة</label>
+        <select id="editShopType" onchange="onEditShopTypeChange()">
+          <option value="deposit" data-i18n="opt_debit">مدين (لنا)</option>
+          <option value="deduction" data-i18n="opt_credit">دائن (المحصل)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label data-i18n="lbl_amount_currency">المبلغ والعملة</label>
+        <div class="amount-input-group">
+          <input type="number" id="editShopAmount" step="any" inputmode="decimal">
+          <select id="editShopCurrency">
+            <option value="EGP">EGP</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="editShopCommission" step="any" min="0" max="100"></div>
+    </div>
+    <div class="form-group"><label data-i18n="lbl_description">البيان</label><textarea id="editShopDescription"></textarea></div>
+    <div class="btn-group" style="justify-content:flex-end;">
+      <button class="submit-btn" onclick="App.saveEditedShop()" data-i18n="btn_save_edits">حفظ التعديلات</button>
+      <button class="print-btn" onclick="App.closeShopEditModal()" data-i18n="btn_cancel">إلغاء</button>
     </div>
   </div>
 </div>

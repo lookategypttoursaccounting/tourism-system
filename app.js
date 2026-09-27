@@ -685,7 +685,7 @@
               <td>${escapeHTML(data.guideName || '-')}</td>
               <td>${escapeHTML(data.shopType || '-')}</td>
               <td>${escapeHTML(data.fileCode || '-')}</td>
-              <td>${escapeHTML(data.month || '-')}</td>
+              <td>${escapeHTML(data.period || data.month || '-')}</td>
               <td>${badge}</td>
               <td style="font-weight:700;">${amountVal.toLocaleString()}</td>
               <td>${escapeHTML(data.currency || 'EGP')}</td>
@@ -695,6 +695,7 @@
               <td>${escapeHTML(data.description || '-')}</td>
               <td>${dateStr}</td>
               <td class="no-print">
+                <button class="edit-btn" onclick="App.openShopEditModal('${docSnap.id}')">${t('btn_edit')}</button>
                 <button class="delete-btn" onclick="App.deleteShop('${docSnap.id}')">${t('btn_delete')}</button>
               </td>
             </tr>
@@ -736,6 +737,51 @@
     async deleteShop(id) {
       if (!confirm(t('confirm_delete_transaction'))) return;
       try { await deleteDocAsync(doc(db, "shop_balances", id)); showToast(t('msg_deleted'), 'success'); } catch(e) { showToast(e.message, 'error'); }
+    },
+
+    openShopEditModal(id) {
+      const item = this.currentShops.find(s => s.id === id);
+      if (!item) return;
+      $('editShopId').value = id;
+      $('editShopEntity').value = item.entity || '';
+      $('editShopGuideName').value = item.guideName || '';
+      $('editShopShopType').value = item.shopType || '';
+      $('editShopFileCode').value = item.fileCode || '';
+      $('editShopPeriod').value = item.period || item.month || 'الفترة الأولى';
+      $('editShopType').value = item.type || 'deposit';
+      $('editShopAmount').value = (item.amount != null) ? item.amount : '';
+      $('editShopCurrency').value = item.currency || 'EGP';
+      $('editShopCommission').value = (item.commission != null) ? item.commission : '';
+      $('editShopDescription').value = item.description || '';
+      onEditShopTypeChange();
+      $('editShopModal').style.display = 'flex';
+    },
+
+    closeShopEditModal() { $('editShopModal').style.display = 'none'; },
+
+    async saveEditedShop() {
+      const id = $('editShopId').value;
+      const entity = $('editShopEntity').value.trim();
+      const guideName = $('editShopGuideName').value.trim();
+      const shopType = $('editShopShopType').value;
+      const fileCode = $('editShopFileCode').value.trim();
+      const period = $('editShopPeriod').value;
+      const type = $('editShopType').value;
+      const amount = parseFloat($('editShopAmount').value);
+      const currency = $('editShopCurrency').value;
+      const commissionRaw = $('editShopCommission').value;
+      const commission = (type === 'deduction' || commissionRaw === '') ? null : parseFloat(commissionRaw);
+      const description = $('editShopDescription').value.trim();
+
+      if (!entity || isNaN(amount) || amount <= 0) return showToast(t('msg_enter_shop_amount'), 'error');
+
+      try {
+        await updateDoc(doc(db, "shop_balances", id), {
+          entity, guideName, shopType, fileCode, period, type, amount, currency, commission, description
+        });
+        showToast(t('msg_edit_saved'), 'success');
+        this.closeShopEditModal();
+      } catch (e) { showToast(e.message, 'error'); }
     },
 
     exportShopsList() {

@@ -706,6 +706,20 @@
     }
   }
 
+  // نفس منطق onShopTypeChange لكن لحقول مودال تعديل حركة المحل
+  function onEditShopTypeChange() {
+    const typeSelect = document.getElementById('editShopType');
+    const commissionInput = document.getElementById('editShopCommission');
+    if (!typeSelect || !commissionInput) return;
+
+    if (typeSelect.value === 'deduction') {
+      commissionInput.value = '';
+      commissionInput.disabled = true;
+    } else {
+      commissionInput.disabled = false;
+    }
+  }
+
   function renderRunningStatement() {
     const entity = document.getElementById('stEntityName').value.trim();
     const currency = document.getElementById('stCurrency').value;
