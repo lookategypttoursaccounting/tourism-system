@@ -341,38 +341,9 @@
 
         <div id="creditStatementSubTab" class="sub-tab-content">
           <div class="statement-container">
-            <div class="statement-search-bar no-print">
-              <button class="search-btn statement-search-toggle" id="statementSearchToggleBtn" onclick="toggleStatementSearchPanel()">🔍 بحث</button>
-            </div>
-
-            <div id="statementSearchPanel" class="statement-search-panel no-print" style="display:none;">
-              <div class="ssp-header">
-                <span>🔍 البحث في كشف الحساب</span>
-                <button class="ssp-close" onclick="toggleStatementSearchPanel()" title="إغلاق">✖</button>
-              </div>
-              <div class="ssp-body">
-                <div class="form-group" style="position:relative;">
-                  <label>اسم الحساب</label>
-                  <input type="text" id="stEntityName" placeholder="اكتب اسم الفندق أو الجهة..." autocomplete="off" oninput="searchStatementEntities()" onfocus="searchStatementEntities()">
-                  <div id="stEntitySuggestions" class="suggestions-dropdown" style="display:none;"></div>
-                </div>
-                <div class="form-group">
-                  <label>العملة</label>
-                  <select id="stCurrency">
-                    <option value="EGP">EGP</option>
-                    <option value="USD">USD</option>
-                    <option value="EUR">EUR</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>رقم الملف</label>
-                  <input type="text" id="stFileCode" placeholder="رقم الملف...">
-                </div>
-              </div>
-              <div class="ssp-footer">
-                <button class="search-btn" onclick="runStatementSearch()">🔍 بحث</button>
-                <button class="print-btn" onclick="resetStatementFilters()">🔄 إعادة ضبط</button>
-              </div>
+            <div class="statement-search-bar no-print" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:15px;">
+              <button type="button" class="btn-search" id="statementSearchToggleBtn" onclick="openStatementSearchModal()">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
+              <span id="statementActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
             </div>
 
             <div id="statementResultsWrap" style="display:none;">
@@ -1135,6 +1106,41 @@
     <div class="btn-group" style="justify-content:flex-end;">
       <button class="submit-btn" onclick="App.saveEditedShop()" data-i18n="btn_save_edits">حفظ التعديلات</button>
       <button class="print-btn" onclick="App.closeShopEditModal()" data-i18n="btn_cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal بحث كشف الحساب (أرصدة الكريديت) -->
+<div id="statementSearchModal" class="modal-overlay search-modal search-modal-wide" onclick="if(event.target===this)closeStatementSearchModal()" onkeydown="if(event.key==='Enter'){event.preventDefault();applyStatementSearch();}">
+  <div class="modal-content">
+    <div class="search-modal-header">
+      <h3>بحث</h3>
+      <button type="button" class="search-modal-x" onclick="closeStatementSearchModal()" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="search-modal-body">
+      <div class="form-row" style="margin-bottom:0;">
+        <div class="form-group">
+          <label>اسم الحساب</label>
+          <input type="text" id="stEntityName" list="stEntityList" placeholder="اختر أو اكتب اسم الفندق / الجهة..." autocomplete="off">
+          <datalist id="stEntityList"></datalist>
+        </div>
+        <div class="form-group">
+          <label>رقم الملف</label>
+          <input type="text" id="stFileCode" placeholder="رقم الملف..." autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>العملة</label>
+          <select id="stCurrency">
+            <option value="EGP">EGP</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="search-modal-footer">
+      <button type="button" class="btn-close-outline" onclick="closeStatementSearchModal()">اغلق</button>
+      <button type="button" class="btn-search" onclick="applyStatementSearch()">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
     </div>
   </div>
 </div>

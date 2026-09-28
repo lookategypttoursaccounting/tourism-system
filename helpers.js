@@ -558,6 +558,8 @@
     if (e.key === 'Escape') {
       const m = document.getElementById('settlementSearchModal');
       if (m && m.style.display === 'flex') closeSettlementSearchModal();
+      const sm = document.getElementById('statementSearchModal');
+      if (sm && sm.style.display === 'flex') closeStatementSearchModal();
     }
   });
 
@@ -628,44 +630,57 @@
   function resetStatementFilters() {
     document.getElementById('stEntityName').value = '';
     document.getElementById('stFileCode').value = '';
+    document.getElementById('stCurrency').value = 'EGP';
     document.getElementById('statementRunningTbody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">قم باختيار الفندق/الجهة والضغط على (🔍 بحث) لعرض كشف الحساب</td></tr>';
     const wrap = document.getElementById('statementResultsWrap');
     if (wrap) wrap.style.display = 'none';
+    updateStatementFilterChip();
   }
-  // فتح/إغلاق قائمة البحث المنسدلة في صفحة كشف الحساب
-  function toggleStatementSearchPanel() {
-    const panel = document.getElementById('statementSearchPanel');
-    if (!panel) return;
-    const isHidden = panel.style.display === 'none' || panel.style.display === '';
-    panel.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) {
-      const inp = document.getElementById('stEntityName');
-      if (inp) setTimeout(() => inp.focus(), 50);
+  // ===== بحث كشف الحساب (نافذة البحث: اسم الحساب + رقم الملف + العملة) =====
+  function openStatementSearchModal() {
+    // اقتراحات أسماء الحسابات من حركات الكريديت المسجلة
+    const entities = [...new Set(((window.App && window.App.currentCredit) || [])
+      .filter(c => !c.isDeleted && c.entity).map(c => c.entity.trim()))]
+      .sort((a, b) => a.localeCompare(b, 'ar'));
+    const dl = document.getElementById('stEntityList');
+    if (dl) dl.innerHTML = entities.map(n => `<option value="${escapeHTML(n)}"></option>`).join('');
+
+    document.getElementById('statementSearchModal').style.display = 'flex';
+    setTimeout(() => { const inp = document.getElementById('stEntityName'); if (inp) inp.focus(); }, 50);
+  }
+
+  function closeStatementSearchModal() {
+    document.getElementById('statementSearchModal').style.display = 'none';
+  }
+
+  // تنفيذ البحث ثم إغلاق النافذة (لو اسم الحساب فاضي تفضل النافذة مفتوحة)
+  function applyStatementSearch() {
+    if (!document.getElementById('stEntityName').value.trim()) {
+      alert('يرجى اختيار اسم الحساب أولاً');
+      return;
     }
-  }
-  // تنفيذ البحث ثم إغلاق القائمة
-  function runStatementSearch() {
     renderRunningStatement();
-    const panel = document.getElementById('statementSearchPanel');
-    if (panel) panel.style.display = 'none';
+    closeStatementSearchModal();
+    updateStatementFilterChip();
   }
-  function searchStatementEntities() {
-    const queryVal = document.getElementById('stEntityName').value.trim().toLowerCase();
-    const dropdown = document.getElementById('stEntitySuggestions');
-    if (!queryVal || !window.App) { dropdown.style.display = 'none'; return; }
-    
-    const matched = [...new Set(window.App.currentCredit.map(c => c.entity))]
-      .filter(e => e && e.toLowerCase().includes(queryVal));
 
-    if (matched.length === 0) { dropdown.style.display = 'none'; return; }
+  // شارة توضح البحث الشغال + زر مسح
+  function updateStatementFilterChip() {
+    const chip = document.getElementById('statementActiveFilter');
+    if (!chip) return;
+    const entity = document.getElementById('stEntityName').value.trim();
+    const wrap = document.getElementById('statementResultsWrap');
+    const active = entity && wrap && wrap.style.display !== 'none';
+    if (!active) { chip.innerHTML = ''; chip.style.display = 'none'; return; }
+    const fileCode = document.getElementById('stFileCode').value.trim();
+    const currency = document.getElementById('stCurrency').value;
+    const parts = ['الحساب: ' + escapeHTML(entity)];
+    if (fileCode) parts.push('الملف: ' + escapeHTML(fileCode));
+    parts.push('العملة: ' + escapeHTML(currency));
+    chip.innerHTML = `<span>${parts.join(' • ')}</span><button type="button" title="مسح البحث" onclick="resetStatementFilters()">✖</button>`;
+    chip.style.display = 'inline-flex';
+  }
 
-    dropdown.innerHTML = matched.map(m => `<div class="suggestion-item" onclick="selectStatementEntity('${escapeHTML(m)}')"><span>${escapeHTML(m)}</span></div>`).join('');
-    dropdown.style.display = 'block';
-  }
-  function selectStatementEntity(name) {
-    document.getElementById('stEntityName').value = name;
-    document.getElementById('stEntitySuggestions').style.display = 'none';
-  }
   function searchCreditEntitySuggestions() {
     const queryVal = document.getElementById('creditEntity').value.trim().toLowerCase();
     const dropdown = document.getElementById('creditEntitySuggestions');
