@@ -336,3 +336,31 @@
       .no-print { display: none !important; }
       .pdf-report-header { display: block !important; }
     }
+
+
+    /* ===== زر ونافذة البحث في تصفية الأوبريتور ===== */
+    .btn-search {
+      background: #2f8cf0; color: #fff; padding: 8px 18px; border-radius: 6px; font-size: 14px; font-weight: 700;
+    }
+    .btn-search:hover { background: #1f78d8; }
+    .btn-close-outline {
+      background: #f8f9fa; color: #495057; border: 1px solid #adb5bd; padding: 7px 16px; border-radius: 6px; font-weight: 600;
+    }
+    .btn-close-outline:hover { background: #e9ecef; }
+    .search-modal .modal-content { padding: 0; max-width: 560px; border-radius: 8px; overflow: hidden; }
+    .search-modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px; border-bottom: 1px solid #e2e8f0;
+    }
+    .search-modal-header h3 { margin: 0; font-size: 20px; color: #1e293b; }
+    .search-modal-x { background: transparent; color: #64748b; padding: 4px 8px; font-size: 18px; }
+    .search-modal-x:hover { color: #0f172a; }
+    .search-modal-body { padding: 20px; }
+    .search-modal-footer {
+      display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid #e2e8f0;
+    }
+    .active-filter-chip {
+      display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; color: #1e40af;
+      border: 1px solid #bfdbfe; border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 700;
+    }
+    .active-filter-chip button { background: transparent; color: #dc2626; padding: 0 2px; font-size: 14px; }

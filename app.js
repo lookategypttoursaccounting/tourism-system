@@ -1733,8 +1733,6 @@
       onSnapshot(q, (snapshot) => {
         const tbody = $('settlementsTableBody');
         const archiveTbody = $('settlementsArchiveTableBody');
-        const operatorSelect = $('operatorFilterSelect');
-        const archiveOperatorSelect = $('archiveOperatorFilterSelect');
 
         this.currentSettlements = [];
         if (snapshot.empty) {
@@ -1762,7 +1760,7 @@
 
           if (data.isApproved) {
             archiveHtmlBuffer += `
-              <tr data-guide="${escapeHTML(data.guideName || '')}">
+              <tr data-guide="${escapeHTML(data.guideName || '')}" data-month="${escapeHTML(getMonthNameFromFileCode(data.fileCode))}">
                 <td>${archiveIdx++}</td>
                 <td><strong>${escapeHTML(data.fileCode || '-')}</strong></td>
                 <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
@@ -1784,7 +1782,7 @@
             `;
           } else {
             htmlBuffer += `
-              <tr data-guide="${escapeHTML(data.guideName || '')}">
+              <tr data-guide="${escapeHTML(data.guideName || '')}" data-month="${escapeHTML(getMonthNameFromFileCode(data.fileCode))}">
                 <td>${idx++}</td>
                 <td><strong>${escapeHTML(data.fileCode || '-')}</strong></td>
                 <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
@@ -1810,19 +1808,9 @@
         if (tbody) tbody.innerHTML = htmlBuffer || '<tr><td colspan="13" style="text-align:center;">لا توجد تصفيات جارية</td></tr>';
         if (archiveTbody) archiveTbody.innerHTML = archiveHtmlBuffer || '<tr><td colspan="14" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
 
-        const optionsHtml = '<option value="">-- جميع الأوبريتورز / المرشدين --</option>' + 
-          Array.from(guidesSet).map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
-        
-        if (operatorSelect) {
-          const curVal = operatorSelect.value;
-          operatorSelect.innerHTML = optionsHtml;
-          operatorSelect.value = curVal;
-        }
-        if (archiveOperatorSelect) {
-          const curVal = archiveOperatorSelect.value;
-          archiveOperatorSelect.innerHTML = optionsHtml;
-          archiveOperatorSelect.value = curVal;
-        }
+        // إعادة تطبيق البحث الحالي (لو فيه) بعد أي تحديث للبيانات
+        applySettlementFilter('list');
+        applySettlementFilter('archive');
 
         this.updateSettlementTotalCommission();
         this.updateArchiveSettlementTotalCommission();

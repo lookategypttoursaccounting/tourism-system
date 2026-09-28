@@ -466,57 +466,100 @@
       .toLowerCase();
   }
 
-  function filterSettlementsTable() {
-    const input = document.getElementById("searchSettlements");
-    const filter = input ? normalizeSearchText(input.value) : "";
-    const select = document.getElementById("operatorFilterSelect");
-    const selectedOperator = select ? select.value.toLowerCase().trim() : "";
+  // ===== بحث تصفيات الأوبريتور (نافذة البحث: اسم الأوبريتور + الشهر) =====
+  const settlementSearchState = {
+    list:    { operator: '', month: '' },
+    archive: { operator: '', month: '' }
+  };
+  let settlementSearchMode = 'list';
 
-    const printFilterElem = document.getElementById("settlementPrintFilter");
-    if (printFilterElem) {
-      printFilterElem.innerText = selectedOperator ? `${select.value}` : 'جميع الأوبريتورز';
+  function openSettlementSearchModal(mode) {
+    settlementSearchMode = mode === 'archive' ? 'archive' : 'list';
+    const st = settlementSearchState[settlementSearchMode];
+    const wantApproved = settlementSearchMode === 'archive';
+
+    // الأوبريتورز الموجودين فعلاً في الصفحة الحالية (الجارية أو الأرشيف)
+    const guides = new Set();
+    ((window.App && window.App.currentSettlements) || []).forEach(s => {
+      if (!!s.isApproved === wantApproved && s.guideName && s.guideName.trim()) guides.add(s.guideName.trim());
+    });
+    const opSel = document.getElementById('settlementSearchOperator');
+    opSel.innerHTML = '<option value="">الكل</option>' +
+      Array.from(guides).sort((a, b) => a.localeCompare(b, 'ar')).map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
+    opSel.value = guides.has(st.operator) ? st.operator : '';
+
+    const monthSel = document.getElementById('settlementSearchMonth');
+    monthSel.innerHTML = '<option value="">الكل</option>' +
+      ARABIC_MONTH_NAMES.map(m => `<option value="${m}">${m}</option>`).join('');
+    monthSel.value = st.month || '';
+
+    document.getElementById('settlementSearchModal').style.display = 'flex';
+  }
+
+  function closeSettlementSearchModal() {
+    document.getElementById('settlementSearchModal').style.display = 'none';
+  }
+
+  function applySettlementSearch() {
+    settlementSearchState[settlementSearchMode] = {
+      operator: document.getElementById('settlementSearchOperator').value,
+      month: document.getElementById('settlementSearchMonth').value
+    };
+    closeSettlementSearchModal();
+    applySettlementFilter(settlementSearchMode);
+  }
+
+  function clearSettlementSearch(mode) {
+    settlementSearchState[mode] = { operator: '', month: '' };
+    applySettlementFilter(mode);
+  }
+
+  function applySettlementFilter(mode) {
+    const isArchive = mode === 'archive';
+    const st = settlementSearchState[mode];
+    const selectedOperator = (st.operator || '').toLowerCase().trim();
+    const selectedMonth = normalizeSearchText(st.month);
+
+    const printElem = document.getElementById(isArchive ? 'archiveSettlementPrintFilter' : 'settlementPrintFilter');
+    if (printElem) {
+      printElem.innerText = [st.operator || 'جميع الأوبريتورز', st.month ? 'شهر ' + st.month : ''].filter(Boolean).join(' — ');
     }
 
-    const trs = document.querySelectorAll("#settlementsTable tbody tr");
+    // شارة توضح الفلتر الشغال + زر مسح
+    const chip = document.getElementById(isArchive ? 'archiveActiveFilter' : 'settlementActiveFilter');
+    if (chip) {
+      const parts = [];
+      if (st.operator) parts.push('الأوبريتور: ' + escapeHTML(st.operator));
+      if (st.month) parts.push('الشهر: ' + escapeHTML(st.month));
+      chip.innerHTML = parts.length ? `<span>${parts.join(' • ')}</span><button type="button" title="مسح البحث" onclick="clearSettlementSearch('${mode}')">✖</button>` : '';
+      chip.style.display = parts.length ? 'inline-flex' : 'none';
+    }
+
+    const trs = document.querySelectorAll(isArchive ? '#settlementsArchiveTable tbody tr' : '#settlementsTable tbody tr');
     trs.forEach(tr => {
       if (tr.children.length === 1) return;
-      const guideName = (tr.getAttribute("data-guide") || "").toLowerCase().trim();
-      const textMatch = normalizeSearchText(tr.innerText).includes(filter);
+      const guideName = (tr.getAttribute('data-guide') || '').toLowerCase().trim();
+      const rowMonth = normalizeSearchText(tr.getAttribute('data-month') || '');
       const operatorMatch = !selectedOperator || guideName === selectedOperator;
-
-      tr.style.display = (textMatch && operatorMatch) ? "" : "none";
+      const monthMatch = !selectedMonth || rowMonth === selectedMonth;
+      tr.style.display = (operatorMatch && monthMatch) ? '' : 'none';
     });
 
-    if (window.App && window.App.updateSettlementTotalCommission) {
-      window.App.updateSettlementTotalCommission();
+    if (window.App) {
+      if (isArchive && window.App.updateArchiveSettlementTotalCommission) window.App.updateArchiveSettlementTotalCommission();
+      if (!isArchive && window.App.updateSettlementTotalCommission) window.App.updateSettlementTotalCommission();
     }
   }
 
-  function filterArchiveSettlementsTable() {
-    const input = document.getElementById("searchArchiveSettlements");
-    const filter = input ? normalizeSearchText(input.value) : "";
-    const select = document.getElementById("archiveOperatorFilterSelect");
-    const selectedOperator = select ? select.value.toLowerCase().trim() : "";
+  function filterSettlementsTable() { applySettlementFilter('list'); }
+  function filterArchiveSettlementsTable() { applySettlementFilter('archive'); }
 
-    const archivePrintFilterElem = document.getElementById("archiveSettlementPrintFilter");
-    if (archivePrintFilterElem) {
-      archivePrintFilterElem.innerText = selectedOperator ? `${select.value}` : 'جميع الأوبريتورز';
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const m = document.getElementById('settlementSearchModal');
+      if (m && m.style.display === 'flex') closeSettlementSearchModal();
     }
-
-    const trs = document.querySelectorAll("#settlementsArchiveTable tbody tr");
-    trs.forEach(tr => {
-      if (tr.children.length === 1) return;
-      const guideName = (tr.getAttribute("data-guide") || "").toLowerCase().trim();
-      const textMatch = normalizeSearchText(tr.innerText).includes(filter);
-      const operatorMatch = !selectedOperator || guideName === selectedOperator;
-
-      tr.style.display = (textMatch && operatorMatch) ? "" : "none";
-    });
-
-    if (window.App && window.App.updateArchiveSettlementTotalCommission) {
-      window.App.updateArchiveSettlementTotalCommission();
-    }
-  }
+  });
 
   function printArchiveSettlementsList() { window.print(); }
   function downloadArchiveSettlementsPDF() {

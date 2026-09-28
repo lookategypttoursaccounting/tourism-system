@@ -492,18 +492,8 @@
               <button class="print-btn" onclick="printSettlementsList()">🖨️ طباعة</button>
               <button class="pdf-btn" onclick="downloadSettlementsPDF()">📄 PDF</button>
               <button class="excel-btn" onclick="App.exportSettlementsList()">📊 Excel</button>
-              <input type="text" id="searchSettlements" placeholder="🔍 بحث (اسم الشهر، الملف...)" onkeyup="filterSettlementsTable()" style="max-width:200px;">
-            </div>
-          </div>
-
-          <div class="filter-panel no-print" style="margin-bottom:15px;">
-            <div class="form-row" style="margin-bottom:0; align-items:center;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label>👤 اختر الأوبريتور</label>
-                <select id="operatorFilterSelect" onchange="filterSettlementsTable()">
-                  <option value="">-- جميع الأوبريتورز / المرشدين --</option>
-                </select>
-              </div>
+              <span id="settlementActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
+              <button type="button" class="btn-search" onclick="openSettlementSearchModal('list')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
             </div>
           </div>
 
@@ -559,18 +549,8 @@
               <button class="print-btn" onclick="printArchiveSettlementsList()">🖨️ طباعة الأرشيف</button>
               <button class="pdf-btn" onclick="downloadArchiveSettlementsPDF()">📄 PDF للأرشيف</button>
               <button class="excel-btn" onclick="App.exportArchiveSettlementsList()">📊 تصدير Excel</button>
-              <input type="text" id="searchArchiveSettlements" placeholder="🔍 بحث (اسم الشهر، الملف...)" onkeyup="filterArchiveSettlementsTable()" style="max-width:200px;">
-            </div>
-          </div>
-
-          <div class="filter-panel no-print" style="margin-bottom:15px;">
-            <div class="form-row" style="margin-bottom:0; align-items:center;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label>👤 اختر الأوبريتور</label>
-                <select id="archiveOperatorFilterSelect" onchange="filterArchiveSettlementsTable()">
-                  <option value="">-- جميع الأوبريتورز / المرشدين --</option>
-                </select>
-              </div>
+              <span id="archiveActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
+              <button type="button" class="btn-search" onclick="openSettlementSearchModal('archive')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
             </div>
           </div>
 
@@ -1153,6 +1133,32 @@
     <div class="btn-group" style="justify-content:flex-end;">
       <button class="submit-btn" onclick="App.saveEditedShop()" data-i18n="btn_save_edits">حفظ التعديلات</button>
       <button class="print-btn" onclick="App.closeShopEditModal()" data-i18n="btn_cancel">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal بحث تصفيات الأوبريتور (سجل التصفيات / الأرشيف) -->
+<div id="settlementSearchModal" class="modal-overlay search-modal" onclick="if(event.target===this)closeSettlementSearchModal()" onkeydown="if(event.key==='Enter'){event.preventDefault();applySettlementSearch();}">
+  <div class="modal-content">
+    <div class="search-modal-header">
+      <h3>بحث</h3>
+      <button type="button" class="search-modal-x" onclick="closeSettlementSearchModal()" aria-label="إغلاق">✕</button>
+    </div>
+    <div class="search-modal-body">
+      <div class="form-row" style="margin-bottom:0;">
+        <div class="form-group">
+          <label>اسم الأوبريتور</label>
+          <select id="settlementSearchOperator"><option value="">الكل</option></select>
+        </div>
+        <div class="form-group">
+          <label>الشهر</label>
+          <select id="settlementSearchMonth"><option value="">الكل</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="search-modal-footer">
+      <button type="button" class="btn-close-outline" onclick="closeSettlementSearchModal()">اغلق</button>
+      <button type="button" class="btn-search" onclick="applySettlementSearch()">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
     </div>
   </div>
 </div>
