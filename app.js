@@ -1738,8 +1738,8 @@
 
         this.currentSettlements = [];
         if (snapshot.empty) {
-          if (tbody) tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;">لا توجد تصفيات مسجلة</td></tr>';
-          if (archiveTbody) archiveTbody.innerHTML = '<tr><td colspan="13" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
+          if (tbody) tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;">لا توجد تصفيات مسجلة</td></tr>';
+          if (archiveTbody) archiveTbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
           this.updateMasterDashboard();
           return;
         }
@@ -1765,6 +1765,7 @@
               <tr data-guide="${escapeHTML(data.guideName || '')}">
                 <td>${archiveIdx++}</td>
                 <td><strong>${escapeHTML(data.fileCode || '-')}</strong></td>
+                <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
                 <td>${escapeHTML(data.guideName || '-')}</td>
                 <td>${calcs.revenue.toLocaleString()}</td>
                 <td>${calcs.expenses.toLocaleString()}</td>
@@ -1786,6 +1787,7 @@
               <tr data-guide="${escapeHTML(data.guideName || '')}">
                 <td>${idx++}</td>
                 <td><strong>${escapeHTML(data.fileCode || '-')}</strong></td>
+                <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
                 <td>${escapeHTML(data.guideName || '-')}</td>
                 <td>${calcs.revenue.toLocaleString()}</td>
                 <td>${calcs.expenses.toLocaleString()}</td>
@@ -1805,8 +1807,8 @@
           }
         });
 
-        if (tbody) tbody.innerHTML = htmlBuffer || '<tr><td colspan="12" style="text-align:center;">لا توجد تصفيات جارية</td></tr>';
-        if (archiveTbody) archiveTbody.innerHTML = archiveHtmlBuffer || '<tr><td colspan="13" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
+        if (tbody) tbody.innerHTML = htmlBuffer || '<tr><td colspan="13" style="text-align:center;">لا توجد تصفيات جارية</td></tr>';
+        if (archiveTbody) archiveTbody.innerHTML = archiveHtmlBuffer || '<tr><td colspan="14" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
 
         const optionsHtml = '<option value="">-- جميع الأوبريتورز / المرشدين --</option>' + 
           Array.from(guidesSet).map(g => `<option value="${escapeHTML(g)}">${escapeHTML(g)}</option>`).join('');
@@ -1910,7 +1912,7 @@
       const data = active.map((item, idx) => {
         const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate);
         return {
-          "م": idx + 1, "كود الملف": item.fileCode, "اسم الأوبريتور": item.guideName,
+          "م": idx + 1, "كود الملف": item.fileCode, "الشهر": getMonthNameFromFileCode(item.fileCode), "اسم الأوبريتور": item.guideName,
           "الإيرادات": calcs.revenue, "المصروفات": calcs.expenses, "الربح": calcs.profit,
           "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": "10%", "مبلغ العمولة": calcs.commissionAmount,
           "ملاحظات": item.notes || ''
@@ -1952,7 +1954,7 @@
       const data = archived.map((item, idx) => {
         const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate);
         return {
-          "م": idx + 1, "كود الملف": item.fileCode, "اسم الأوبريتور": item.guideName,
+          "م": idx + 1, "كود الملف": item.fileCode, "الشهر": getMonthNameFromFileCode(item.fileCode), "اسم الأوبريتور": item.guideName,
           "الإيرادات": calcs.revenue, "المصروفات": calcs.expenses, "الربح": calcs.profit,
           "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": "10%", "مبلغ العمولة": calcs.commissionAmount,
           "ملاحظات": item.notes || '', "الحالة": "معتمد"
@@ -1966,8 +1968,8 @@
       let total = 0;
       const trs = document.querySelectorAll("#settlementsTable tbody tr");
       trs.forEach(tr => {
-        if (tr.style.display !== 'none' && tr.children.length > 8) {
-          const valStr = tr.children[8].innerText.replace(/,/g, '');
+        if (tr.style.display !== 'none' && tr.children.length > 9) {
+          const valStr = tr.children[9].innerText.replace(/,/g, '');
           const val = parseFloat(valStr) || 0;
           total += val;
         }
@@ -1980,8 +1982,8 @@
       let total = 0;
       const trs = document.querySelectorAll("#settlementsArchiveTable tbody tr");
       trs.forEach(tr => {
-        if (tr.style.display !== 'none' && tr.children.length > 8) {
-          const valStr = tr.children[8].innerText.replace(/,/g, '');
+        if (tr.style.display !== 'none' && tr.children.length > 9) {
+          const valStr = tr.children[9].innerText.replace(/,/g, '');
           const val = parseFloat(valStr) || 0;
           total += val;
         }

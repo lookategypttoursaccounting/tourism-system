@@ -492,7 +492,7 @@
               <button class="print-btn" onclick="printSettlementsList()">🖨️ طباعة</button>
               <button class="pdf-btn" onclick="downloadSettlementsPDF()">📄 PDF</button>
               <button class="excel-btn" onclick="App.exportSettlementsList()">📊 Excel</button>
-              <input type="text" id="searchSettlements" placeholder="🔍 بحث..." onkeyup="filterSettlementsTable()" style="max-width:200px;">
+              <input type="text" id="searchSettlements" placeholder="🔍 بحث (اسم الشهر، الملف...)" onkeyup="filterSettlementsTable()" style="max-width:200px;">
             </div>
           </div>
 
@@ -530,6 +530,7 @@
                   <tr>
                     <th>#</th>
                     <th>كود الملف</th>
+                    <th>الشهر</th>
                     <th>اسم الأوبريتور</th>
                     <th>الإيرادات</th>
                     <th>المصروفات</th>
@@ -543,7 +544,7 @@
                   </tr>
                 </thead>
                 <tbody id="settlementsTableBody">
-                  <tr><td colspan="12" style="text-align:center;">جاري التحميل...</td></tr>
+                  <tr><td colspan="13" style="text-align:center;">جاري التحميل...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -558,7 +559,7 @@
               <button class="print-btn" onclick="printArchiveSettlementsList()">🖨️ طباعة الأرشيف</button>
               <button class="pdf-btn" onclick="downloadArchiveSettlementsPDF()">📄 PDF للأرشيف</button>
               <button class="excel-btn" onclick="App.exportArchiveSettlementsList()">📊 تصدير Excel</button>
-              <input type="text" id="searchArchiveSettlements" placeholder="🔍 بحث بالأرشيف..." onkeyup="filterArchiveSettlementsTable()" style="max-width:200px;">
+              <input type="text" id="searchArchiveSettlements" placeholder="🔍 بحث (اسم الشهر، الملف...)" onkeyup="filterArchiveSettlementsTable()" style="max-width:200px;">
             </div>
           </div>
 
@@ -596,6 +597,7 @@
                   <tr>
                     <th>#</th>
                     <th>كود الملف</th>
+                    <th>الشهر</th>
                     <th>اسم الأوبريتور</th>
                     <th>الإيرادات</th>
                     <th>المصروفات</th>
@@ -610,7 +612,7 @@
                   </tr>
                 </thead>
                 <tbody id="settlementsArchiveTableBody">
-                  <tr><td colspan="13" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>
+                  <tr><td colspan="14" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>
                 </tbody>
               </table>
             </div>

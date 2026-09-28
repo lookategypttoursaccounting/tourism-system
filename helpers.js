@@ -441,9 +441,34 @@
     });
   }
 
+  // أسماء الشهور بالعربي
+  const ARABIC_MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+  // استخراج اسم الشهر بالعربي من رقم الملف بتنسيق yyyymm/file number (مثال: 202603/145 => مارس)
+  // بيقبل كمان الأرقام العربية (٠-٩) وفواصل / \ - . بين الشهر ورقم الملف. لو التنسيق غير صحيح يرجع فاضي.
+  function getMonthNameFromFileCode(fileCode) {
+    const s = String(fileCode || '').trim().replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660));
+    const m = s.match(/^(\d{4})(\d{2})\s*[\/\\\-.]/);
+    if (!m) return '';
+    const month = parseInt(m[2], 10);
+    return (month >= 1 && month <= 12) ? ARABIC_MONTH_NAMES[month - 1] : '';
+  }
+
+  // توحيد النص للبحث (يتجاهل الفرق بين أ/ا/إ و ى/ي و ة/ه والتشكيل) عشان البحث باسم الشهر ينجح بأي كتابة
+  function normalizeSearchText(str) {
+    return String(str || '')
+      .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+      .replace(/[أإآٱ]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
   function filterSettlementsTable() {
     const input = document.getElementById("searchSettlements");
-    const filter = input ? input.value.toLowerCase() : "";
+    const filter = input ? normalizeSearchText(input.value) : "";
     const select = document.getElementById("operatorFilterSelect");
     const selectedOperator = select ? select.value.toLowerCase().trim() : "";
 
@@ -456,7 +481,7 @@
     trs.forEach(tr => {
       if (tr.children.length === 1) return;
       const guideName = (tr.getAttribute("data-guide") || "").toLowerCase().trim();
-      const textMatch = tr.innerText.toLowerCase().includes(filter);
+      const textMatch = normalizeSearchText(tr.innerText).includes(filter);
       const operatorMatch = !selectedOperator || guideName === selectedOperator;
 
       tr.style.display = (textMatch && operatorMatch) ? "" : "none";
@@ -469,7 +494,7 @@
 
   function filterArchiveSettlementsTable() {
     const input = document.getElementById("searchArchiveSettlements");
-    const filter = input ? input.value.toLowerCase() : "";
+    const filter = input ? normalizeSearchText(input.value) : "";
     const select = document.getElementById("archiveOperatorFilterSelect");
     const selectedOperator = select ? select.value.toLowerCase().trim() : "";
 
@@ -482,7 +507,7 @@
     trs.forEach(tr => {
       if (tr.children.length === 1) return;
       const guideName = (tr.getAttribute("data-guide") || "").toLowerCase().trim();
-      const textMatch = tr.innerText.toLowerCase().includes(filter);
+      const textMatch = normalizeSearchText(tr.innerText).includes(filter);
       const operatorMatch = !selectedOperator || guideName === selectedOperator;
 
       tr.style.display = (textMatch && operatorMatch) ? "" : "none";
