@@ -487,13 +487,14 @@
         <!-- 2. سجل تصفيات الملفات الجارية -->
         <div id="settlementListSubTab" class="sub-tab-content">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-            <h3 data-i18n="h_settlement_list">سجل تصفيات الملفات (الجارية)</h3>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;"><h3 data-i18n="h_settlement_list">سجل تصفيات الملفات (الجارية)</h3>
+            <span id="settlementActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
+              <button type="button" class="btn-search" onclick="openSettlementSearchModal('list')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button></div>
             <div class="btn-group no-print" style="margin:0;">
               <button class="print-btn" onclick="printSettlementsList()">🖨️ طباعة</button>
               <button class="pdf-btn" onclick="downloadSettlementsPDF()">📄 PDF</button>
               <button class="excel-btn" onclick="App.exportSettlementsList()">📊 Excel</button>
-              <span id="settlementActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
-              <button type="button" class="btn-search" onclick="openSettlementSearchModal('list')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
+              
             </div>
           </div>
 
@@ -544,13 +545,14 @@
         <!-- 3. الأرشيف (التصفيات المعتمدة) -->
         <div id="settlementArchiveSubTab" class="sub-tab-content">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-            <h3 data-i18n="h_settlement_archive">📁 أرشيف التصفيات المعتمدة</h3>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;"><h3 data-i18n="h_settlement_archive">📁 أرشيف التصفيات المعتمدة</h3>
+            <span id="archiveActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
+              <button type="button" class="btn-search" onclick="openSettlementSearchModal('archive')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button></div>
             <div class="btn-group no-print" style="margin:0;">
               <button class="print-btn" onclick="printArchiveSettlementsList()">🖨️ طباعة الأرشيف</button>
               <button class="pdf-btn" onclick="downloadArchiveSettlementsPDF()">📄 PDF للأرشيف</button>
               <button class="excel-btn" onclick="App.exportArchiveSettlementsList()">📊 تصدير Excel</button>
-              <span id="archiveActiveFilter" class="active-filter-chip no-print" style="display:none;"></span>
-              <button type="button" class="btn-search" onclick="openSettlementSearchModal('archive')">بحث <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15.5" y2="15.5"/></svg></button>
+              
             </div>
           </div>
 
