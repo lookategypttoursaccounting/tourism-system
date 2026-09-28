@@ -725,10 +725,12 @@
                   <th>صافي الربح</th>
                   <th>نسبة العمولة</th>
                   <th>قيمة العمولة</th>
+                  <th>الحالة</th>
+                  <th class="no-print">اعتماد</th>
                 </tr>
               </thead>
               <tbody id="aviationCommissionTableBody">
-                <tr><td colspan="9" style="text-align:center;">لا توجد بيانات</td></tr>
+                <tr><td colspan="11" style="text-align:center;">لا توجد بيانات</td></tr>
               </tbody>
             </table>
           </div>
@@ -851,6 +853,7 @@
       </div>
 
       <div id="shopsTab" class="tab-content">
+        <datalist id="shopTypesList"></datalist>
         <div id="addShopDirectorySubTab" class="sub-tab-content active">
           <h3 data-i18n="h_add_shop_directory">تسجيل محل جديد</h3>
           <div class="form-row">
@@ -867,16 +870,7 @@
           </div>
           <div class="form-row">
             <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label>
-              <select id="shopDirType">
-                <option value="بردي" data-i18n="opt_shop_papyrus">بردي</option>
-                <option value="بازار" data-i18n="opt_shop_bazaar">بازار</option>
-                <option value="قطن" data-i18n="opt_shop_cotton">قطن</option>
-                <option value="ريحه" data-i18n="opt_shop_perfume">ريحة</option>
-                <option value="حجر" data-i18n="opt_shop_stone">حجر</option>
-                <option value="سجاد" data-i18n="opt_shop_carpet">سجاد</option>
-                <option value="توابل" data-i18n="opt_shop_spice">توابل</option>
-                <option value="أخرى" data-i18n="opt_region_other">أخرى</option>
-              </select>
+              <input type="text" id="shopDirType" list="shopTypesList" autocomplete="off" placeholder="اختر نوع أو اكتب نوع جديد..." data-i18n-placeholder="ph_shop_type_open">
             </div>
             <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="shopDirCommission" placeholder="النسبة %" data-i18n-placeholder="ph_commission" step="any" min="0" max="100"></div>
           </div>
@@ -1088,16 +1082,7 @@
       </select>
     </div>
     <div class="form-group"><label data-i18n="lbl_shop_type">نوع المحل</label>
-      <select id="editShopDirType">
-        <option value="بردي">بردي</option>
-        <option value="بازار">بازار</option>
-        <option value="قطن">قطن</option>
-        <option value="ريحة">ريحة</option>
-        <option value="حجر">حجر</option>
-        <option value="سجاد">سجاد</option>
-        <option value="توابل">توابل</option>
-        <option value="أخرى">أخرى</option>
-      </select>
+      <input type="text" id="editShopDirType" list="shopTypesList" autocomplete="off" placeholder="اختر نوع أو اكتب نوع جديد..." data-i18n-placeholder="ph_shop_type_open">
     </div>
     <div class="form-group"><label data-i18n="lbl_commission">العمولة</label><input type="number" id="editShopDirCommission" step="any" min="0" max="100"></div>
     <div class="btn-group" style="justify-content:flex-end;">

@@ -745,7 +745,12 @@
       $('editShopId').value = id;
       $('editShopEntity').value = item.entity || '';
       $('editShopGuideName').value = item.guideName || '';
-      $('editShopShopType').value = item.shopType || '';
+      const stSel = $('editShopShopType');
+      if (item.shopType && !Array.from(stSel.options).some(o => o.value === item.shopType)) {
+        const opt = document.createElement('option'); opt.value = item.shopType; opt.textContent = item.shopType;
+        stSel.insertBefore(opt, Array.from(stSel.options).find(o => o.value === 'أخرى') || null);
+      }
+      stSel.value = item.shopType || '';
       $('editShopFileCode').value = item.fileCode || '';
       $('editShopPeriod').value = item.period || item.month || 'الفترة الأولى';
       $('editShopType').value = item.type || 'deposit';
@@ -875,6 +880,7 @@
         this.currentShopDirectory = [];
         if (!tbody) return;
         if (snapshot.empty) {
+          this.refreshShopTypeOptions();
           tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">${t('msg_no_data')}</td></tr>`;
           return;
         }
@@ -900,14 +906,48 @@
             </tr>
           `;
         });
+        this.refreshShopTypeOptions();
         tbody.innerHTML = htmlBuffer;
+      });
+    },
+
+    // أنواع المحلات الافتراضية + أي أنواع جديدة تم إضافتها يدويًا في دليل المحلات
+    DEFAULT_SHOP_TYPES: ['بردي', 'بازار', 'قطن', 'ريحه', 'حجر', 'سجاد', 'توابل'],
+
+    getAllShopTypes() {
+      const norm = s => String(s).replace(/[ةه]/g, 'ه').replace(/\s+/g, '').trim();
+      const list = [...this.DEFAULT_SHOP_TYPES];
+      (this.currentShopDirectory || []).forEach(s => {
+        const ty = (s.type || '').trim();
+        if (ty && !list.some(x => norm(x) === norm(ty))) list.push(ty);
+      });
+      return list;
+    },
+
+    // تحديث قائمة اقتراحات نوع المحل (datalist) + خيارات قوائم نوع المحل في نموذج الحركة والتعديل
+    refreshShopTypeOptions() {
+      const types = this.getAllShopTypes();
+      const dl = $('shopTypesList');
+      if (dl) dl.innerHTML = types.map(x => `<option value="${escapeHTML(x)}"></option>`).join('');
+      ['shopShopType', 'editShopShopType'].forEach(id => {
+        const sel = $(id);
+        if (!sel) return;
+        const existing = Array.from(sel.options).map(o => o.value);
+        types.forEach(x => {
+          if (!existing.includes(x) && !existing.some(v => v.replace(/[ةه]/g, 'ه') === x.replace(/[ةه]/g, 'ه'))) {
+            const opt = document.createElement('option');
+            opt.value = x; opt.textContent = x;
+            const other = Array.from(sel.options).find(o => o.value === 'أخرى');
+            sel.insertBefore(opt, other || null);
+          }
+        });
       });
     },
 
     async saveShopDirectory() {
       const name = $('shopDirName').value.trim();
       const region = $('shopDirRegion').value;
-      const type = $('shopDirType').value;
+      const type = $('shopDirType').value.trim();
       const commissionRate = parseFloat($('shopDirCommission').value);
 
       if (!name) return showToast(t('msg_enter_shop_name'), 'error');
@@ -919,7 +959,7 @@
           name, region, type, commissionRate: isNaN(commissionRate) ? null : commissionRate, isDeleted: false, createdAt: new Date()
         });
         showToast(t('msg_shop_saved'), 'success');
-        $('shopDirName').value = ''; $('shopDirCommission').value = '';
+        $('shopDirName').value = ''; $('shopDirType').value = ''; $('shopDirCommission').value = '';
       } catch (e) { showToast(e.message, 'error'); }
       finally { btn.disabled = false; }
     },
@@ -935,7 +975,7 @@
       $('editShopDirId').value = id;
       $('editShopDirName').value = item.name || '';
       $('editShopDirRegion').value = item.region || 'الجيزة';
-      $('editShopDirType').value = item.type || 'بردي';
+      $('editShopDirType').value = item.type || '';
       $('editShopDirCommission').value = (item.commissionRate != null) ? item.commissionRate : '';
       $('editShopDirectoryModal').style.display = 'flex';
     },
@@ -946,7 +986,7 @@
       const id = $('editShopDirId').value;
       const name = $('editShopDirName').value.trim();
       const region = $('editShopDirRegion').value;
-      const type = $('editShopDirType').value;
+      const type = $('editShopDirType').value.trim();
       const commissionRate = parseFloat($('editShopDirCommission').value);
 
       if (!name) return showToast(t('msg_enter_shop_name'), 'error');
@@ -1097,7 +1137,7 @@
 
       const cashRecords = this.getCashAviationRecords();
       if (cashRecords.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">لا توجد عمليات كاش مطابقة (تحتوي على "cash" في رقم الملف)</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;">لا توجد عمليات كاش مطابقة (تحتوي على "cash" في رقم الملف)</td></tr>';
         return;
       }
 
@@ -1119,9 +1159,30 @@
             <td style="font-weight:700; color:${profitColor};">${netProfit.toLocaleString()}</td>
             <td>${this.AVIATION_COMMISSION_RATE}%</td>
             <td style="font-weight:700; color:#16a34a;">${commissionAmount.toLocaleString(undefined, {maximumFractionDigits: 2})}</td>
+            <td>${item.commissionPaid ? '<span class="badge badge-deposit">تم الصرف</span>' : '<span class="badge badge-advance">قيد الاعتماد</span>'}</td>
+            <td class="no-print">${item.commissionPaid
+              ? `<button class="unapprove-btn" onclick="App.unapproveAviationCommission('${item.id}')">إلغاء الاعتماد</button>`
+              : `<button class="approve-btn" onclick="App.approveAviationCommission('${item.id}')">اعتماد</button>`}</td>
           </tr>
         `;
       }).join('');
+    },
+
+    // اعتماد عمولة الطيران وترحيلها: تتغير حالتها إلى "تم الصرف"
+    async approveAviationCommission(id) {
+      if (!confirm('تأكيد اعتماد العمولة وترحيلها؟')) return;
+      try {
+        await updateDoc(doc(db, "aviation_records", id), { commissionPaid: true, commissionPaidAt: new Date() });
+        showToast('تم اعتماد العمولة — تم الصرف', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
+    },
+
+    async unapproveAviationCommission(id) {
+      if (!confirm('تأكيد إلغاء اعتماد العمولة؟')) return;
+      try {
+        await updateDoc(doc(db, "aviation_records", id), { commissionPaid: false });
+        showToast('تم إلغاء اعتماد العمولة', 'success');
+      } catch (e) { showToast(e.message, 'error'); }
     },
 
     exportAviationCommissionList() {
@@ -1134,7 +1195,8 @@
         return {
           "م": idx+1, "نوع العملية": item.transactionType || 'بيع', "شركة الطيران": item.airlineName, "رقم الملف": item.fileCode,
           "إجمالي سعر البيع": totalSelling, "إجمالي القيمة الفعلية": totalActual, "صافي الربح": netProfit,
-          "نسبة العمولة": this.AVIATION_COMMISSION_RATE + '%', "قيمة العمولة": commissionAmount
+          "نسبة العمولة": this.AVIATION_COMMISSION_RATE + '%', "قيمة العمولة": commissionAmount,
+          "الحالة": item.commissionPaid ? 'تم الصرف' : 'قيد الاعتماد'
         };
       });
       const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new();
