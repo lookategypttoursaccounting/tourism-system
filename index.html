@@ -431,7 +431,7 @@
         <div id="addSettlementSubTab" class="sub-tab-content active">
           <h3 data-i18n="h_add_settlement">إضافة تصفية ملف جديد</h3>
           <div class="form-row">
-            <div class="form-group"><label>كود الملف (File Code)</label><input type="text" id="fileCode" placeholder="EG-2026-99"></div>
+            <div class="form-group"><label>كود الملف (File Code)</label><input type="text" id="fileCode" placeholder="202603/145" oninput="App.previewSettlementMonth('fileCode','fileCodeMonthHint')"><small id="fileCodeMonthHint" style="display:block; margin-top:4px; color:#64748b;"></small></div>
             <div class="form-group"><label>اسم الأوبريتور</label><input type="text" id="guideName" placeholder="اسم الأوبريتور"></div>
           </div>
           <div class="form-row">
@@ -1007,7 +1007,7 @@
   <div class="modal-content">
     <h3 data-i18n="h_edit_settlement">تعديل تصفية الملف</h3>
     <input type="hidden" id="editSettlementId">
-    <div class="form-group"><label>كود الملف</label><input type="text" id="editFileCode"></div>
+    <div class="form-group"><label>كود الملف</label><input type="text" id="editFileCode" placeholder="202603/145" oninput="App.previewSettlementMonth('editFileCode','editFileCodeMonthHint')"><small id="editFileCodeMonthHint" style="display:block; margin-top:4px; color:#64748b;"></small></div>
     <div class="form-group"><label>اسم الأوبريتور</label><input type="text" id="editGuideName"></div>
     <div class="form-group"><label>الإيرادات</label><input type="number" id="editSettlementRevenue" step="any"></div>
     <div class="form-group"><label>المصروفات</label><input type="number" id="editSettlementExpenses" step="any"></div>

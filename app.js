@@ -164,6 +164,43 @@
       return Boolean(key) && records.some(record => !record.isDeleted && record.id !== excludeId && this.normalizeKey(record[field]) === key);
     },
 
+    // تحقق من صيغة رقم الملف المطلوبة لتصفية الأوبريتور: سنة+شهر (yyyymm) ثم / أو - أو . ثم رقم الملف
+    // مطلوبة عشان الشهر بيتقرأ من رقم الملف تلقائيًا في سجل التصفيات والأرشيف
+    isValidSettlementFileCode(fileCode) {
+      const s = String(fileCode || '').trim().replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660));
+      const m = s.match(/^(\d{4})(\d{2})[\/\\\-.]\S+$/);
+      if (!m) return false;
+      const month = parseInt(m[2], 10);
+      return month >= 1 && month <= 12;
+    },
+
+    // معاينة فورية للشهر المُستخرج من رقم الملف أثناء الكتابة، مع تنبيه لو الصيغة غلط
+    previewSettlementMonth(inputId, hintId) {
+      const hint = $(hintId);
+      if (!hint) return;
+      const raw = $(inputId).value.trim();
+      if (!raw) { hint.textContent = ''; return; }
+      const month = getMonthNameFromFileCode(raw);
+      if (month) {
+        hint.style.color = '#16a34a';
+        hint.textContent = '✓ الشهر: ' + month;
+      } else {
+        hint.style.color = '#dc2626';
+        hint.textContent = '✗ صيغة غير صحيحة، المطلوب مثال: 202603/145';
+      }
+    },
+
+    // هل رقم الملف ده مسجل من قبل لنفس الأوبريتور (بين التصفيات الجارية والأرشيف)؟
+    isDuplicateSettlement(fileCode, guideName, excludeId = '') {
+      const fileKey = this.normalizeKey(fileCode);
+      const guideKey = this.normalizeKey(guideName);
+      if (!fileKey || !guideKey) return false;
+      return (this.currentSettlements || []).some(s =>
+        !s.isDeleted && s.id !== excludeId &&
+        this.normalizeKey(s.fileCode) === fileKey && this.normalizeKey(s.guideName) === guideKey
+      );
+    },
+
     calculateSettlementValues(revenueInput, expensesInput, exchangeRateInput) {
       const rawRevenue = parseFloat(revenueInput) || 0;
       const rawExpenses = parseFloat(expensesInput) || 0;
@@ -722,6 +759,7 @@
       const description = $('shopDescription').value.trim();
 
       if (!entity || isNaN(amount) || amount <= 0) return showToast(t('msg_enter_shop_amount'), 'error');
+      if (commission != null && !isNaN(commission) && (commission < 0 || commission > 100)) return showToast('نسبة العمولة يجب أن تكون بين 0 و 100', 'error');
 
       const btn = $('btnSaveShop'); btn.disabled = true;
       try {
@@ -779,6 +817,7 @@
       const description = $('editShopDescription').value.trim();
 
       if (!entity || isNaN(amount) || amount <= 0) return showToast(t('msg_enter_shop_amount'), 'error');
+      if (commission != null && !isNaN(commission) && (commission < 0 || commission > 100)) return showToast('نسبة العمولة يجب أن تكون بين 0 و 100', 'error');
 
       try {
         await updateDoc(doc(db, "shop_balances", id), {
@@ -951,6 +990,7 @@
       const commissionRate = parseFloat($('shopDirCommission').value);
 
       if (!name) return showToast(t('msg_enter_shop_name'), 'error');
+      if (!isNaN(commissionRate) && (commissionRate < 0 || commissionRate > 100)) return showToast('نسبة العمولة يجب أن تكون بين 0 و 100', 'error');
       if (this.isDuplicate(this.currentShopDirectory, 'name', name)) return showToast(t('msg_duplicate_shop'), 'error');
 
       const btn = $('btnSaveShopDirectory'); btn.disabled = true;
@@ -990,6 +1030,7 @@
       const commissionRate = parseFloat($('editShopDirCommission').value);
 
       if (!name) return showToast(t('msg_enter_shop_name'), 'error');
+      if (!isNaN(commissionRate) && (commissionRate < 0 || commissionRate > 100)) return showToast('نسبة العمولة يجب أن تكون بين 0 و 100', 'error');
       if (this.isDuplicate(this.currentShopDirectory, 'name', name, id)) return showToast(t('msg_duplicate_shop'), 'error');
       try {
         await updateDoc(doc(db, "shop_directory", id), { name, region, type, commissionRate: isNaN(commissionRate) ? null : commissionRate });
@@ -1221,6 +1262,7 @@
       const notes = $('aviationNotes').value.trim();
 
       if (!airlineName || !pnrNumber || isNaN(ticketCost)) return showToast('يرجى ملء الحقول الأساسية', 'error');
+      if (ticketCost < 0 || (sellingPrice != null && sellingPrice < 0) || passengersCount < 0) return showToast('لا يمكن إدخال قيمة سالبة في التكلفة أو سعر البيع أو عدد المسافرين', 'error');
 
       const btn = $('btnSaveAviation'); btn.disabled = true;
       try {
@@ -1284,6 +1326,7 @@
       const notes = $('editAviationNotes').value.trim();
 
       if (!airlineName || !pnrNumber || isNaN(ticketCost)) return showToast('يرجى ملء الحقول المطلوبة', 'error');
+      if (ticketCost < 0 || (sellingPrice != null && sellingPrice < 0) || passengersCount < 0) return showToast('لا يمكن إدخال قيمة سالبة في التكلفة أو سعر البيع أو عدد المسافرين', 'error');
       try {
         await updateDoc(doc(db, "aviation_records", id), {
           transactionType, airlineName, pnrNumber, ticketNumber, passengerName, fileCode,
@@ -1828,6 +1871,11 @@
       const notes = $('settlementNotes').value.trim();
 
       if (!fileCode || !guideName) return showToast('يرجى ادخال كود الملف واسم الأوبريتور', 'error');
+      if (!this.isValidSettlementFileCode(fileCode)) return showToast('صيغة رقم الملف غير صحيحة، المطلوب: سنة وشهر (yyyymm) ثم / ثم رقم الملف — مثال: 202603/145', 'error');
+      if (revenue < 0 || expenses < 0 || exchangeRate < 0) return showToast('لا يمكن إدخال قيمة سالبة في الإيرادات أو المصروفات أو سعر الصرف', 'error');
+      if (this.isDuplicateSettlement(fileCode, guideName)) {
+        if (!confirm('رقم الملف ده مسجل من قبل لنفس الأوبريتور. هل تريد تسجيل تصفية جديدة بنفس الرقم؟')) return;
+      }
 
       const btn = $('btnSaveSettlement'); btn.disabled = true;
       try {
@@ -1871,6 +1919,7 @@
       $('editSettlementCurrency').value = item.currency || 'USD';
       $('editSettlementExchangeRate').value = item.exchangeRate || '';
       $('editSettlementNotes').value = item.notes || '';
+      this.previewSettlementMonth('editFileCode', 'editFileCodeMonthHint');
       $('editSettlementModal').style.display = 'flex';
     },
 
@@ -1887,6 +1936,11 @@
       const notes = $('editSettlementNotes').value.trim();
 
       if (!fileCode || !guideName) return showToast('يرجى استكمال البيانات', 'error');
+      if (!this.isValidSettlementFileCode(fileCode)) return showToast('صيغة رقم الملف غير صحيحة، المطلوب: سنة وشهر (yyyymm) ثم / ثم رقم الملف — مثال: 202603/145', 'error');
+      if (revenue < 0 || expenses < 0 || exchangeRate < 0) return showToast('لا يمكن إدخال قيمة سالبة في الإيرادات أو المصروفات أو سعر الصرف', 'error');
+      if (this.isDuplicateSettlement(fileCode, guideName, id)) {
+        if (!confirm('رقم الملف ده مسجل من قبل لنفس الأوبريتور. هل تريد المتابعة؟')) return;
+      }
       try {
         await updateDoc(doc(db, "settlement_records", id), { fileCode, guideName, revenue, expenses, currency, exchangeRate, notes });
         showToast('تم تعديل التصفية بنجاح', 'success');
