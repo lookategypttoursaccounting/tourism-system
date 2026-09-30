@@ -201,7 +201,14 @@
       );
     },
 
-    calculateSettlementValues(revenueInput, expensesInput, exchangeRateInput) {
+    // نسبة عمولة تصفية الأوبريتور حسب نوع الملف: عادي = 10%، OPT = 25%
+    SETTLEMENT_COMMISSION_RATES: { normal: 10, opt: 25 },
+
+    getSettlementCommissionRatePercent(fileType) {
+      return this.SETTLEMENT_COMMISSION_RATES[fileType] ?? this.SETTLEMENT_COMMISSION_RATES.normal;
+    },
+
+    calculateSettlementValues(revenueInput, expensesInput, exchangeRateInput, fileType) {
       const rawRevenue = parseFloat(revenueInput) || 0;
       const rawExpenses = parseFloat(expensesInput) || 0;
       const exchangeRate = parseFloat(exchangeRateInput) || 0;
@@ -212,7 +219,8 @@
       const expenses = rawExpenses * rate;
       const profit = revenue - expenses;
       const netAfterTax = profit / 1.14;
-      const commissionRate = 0.10;
+      const commissionRatePercent = this.getSettlementCommissionRatePercent(fileType);
+      const commissionRate = commissionRatePercent / 100;
       const commissionAmount = netAfterTax * commissionRate;
 
       return {
@@ -223,9 +231,17 @@
         expenses,
         profit,
         netAfterTax,
+        commissionRatePercent,
         commissionRate,
         commissionAmount
       };
+    },
+
+    // نص توضيحي بجانب اختيار "نوع الملف" يوضح نسبة العمولة المطبّقة فورًا
+    updateSettlementRateHint(selectId, hintId) {
+      const sel = $(selectId), hint = $(hintId);
+      if (!sel || !hint) return;
+      hint.textContent = 'نسبة العمولة: ' + this.getSettlementCommissionRatePercent(sel.value) + '%';
     },
 
     // 1. SUPPLIERS
@@ -1779,8 +1795,8 @@
 
         this.currentSettlements = [];
         if (snapshot.empty) {
-          if (tbody) tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;">لا توجد تصفيات مسجلة</td></tr>';
-          if (archiveTbody) archiveTbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
+          if (tbody) tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">لا توجد تصفيات مسجلة</td></tr>';
+          if (archiveTbody) archiveTbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
           this.updateMasterDashboard();
           return;
         }
@@ -1798,7 +1814,7 @@
 
           if (data.guideName) guidesSet.add(data.guideName.trim());
 
-          const calcs = this.calculateSettlementValues(data.revenue, data.expenses, data.exchangeRate);
+          const calcs = this.calculateSettlementValues(data.revenue, data.expenses, data.exchangeRate, data.fileType);
           const dateStr = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString('en-GB') : '-';
 
           if (data.isApproved) {
@@ -1809,11 +1825,12 @@
                 <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
                 <td>${escapeHTML(data.guideName || '-')}</td>
                 <td>${data.paxCount != null ? data.paxCount : '-'}</td>
+                <td>${data.fileType === 'opt' ? 'OPT' : 'عادي'}</td>
                 <td>${calcs.revenue.toLocaleString()}</td>
                 <td>${calcs.expenses.toLocaleString()}</td>
                 <td>${calcs.profit.toLocaleString()}</td>
                 <td>${calcs.netAfterTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td>10%</td>
+                <td>${calcs.commissionRatePercent}%</td>
                 <td style="font-weight:700; color:#16a34a;">${calcs.commissionAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td>${escapeHTML(data.notes || '-')}</td>
                 <td><span class="badge badge-archive">معتمد</span></td>
@@ -1832,11 +1849,12 @@
                 <td>${escapeHTML(getMonthNameFromFileCode(data.fileCode) || '-')}</td>
                 <td>${escapeHTML(data.guideName || '-')}</td>
                 <td>${data.paxCount != null ? data.paxCount : '-'}</td>
+                <td>${data.fileType === 'opt' ? 'OPT' : 'عادي'}</td>
                 <td>${calcs.revenue.toLocaleString()}</td>
                 <td>${calcs.expenses.toLocaleString()}</td>
                 <td>${calcs.profit.toLocaleString()}</td>
                 <td>${calcs.netAfterTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td>10%</td>
+                <td>${calcs.commissionRatePercent}%</td>
                 <td style="font-weight:700; color:#16a34a;">${calcs.commissionAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td>${escapeHTML(data.notes || '-')}</td>
                 <td>${dateStr}</td>
@@ -1850,8 +1868,8 @@
           }
         });
 
-        if (tbody) tbody.innerHTML = htmlBuffer || '<tr><td colspan="14" style="text-align:center;">لا توجد تصفيات جارية</td></tr>';
-        if (archiveTbody) archiveTbody.innerHTML = archiveHtmlBuffer || '<tr><td colspan="15" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
+        if (tbody) tbody.innerHTML = htmlBuffer || '<tr><td colspan="15" style="text-align:center;">لا توجد تصفيات جارية</td></tr>';
+        if (archiveTbody) archiveTbody.innerHTML = archiveHtmlBuffer || '<tr><td colspan="16" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>';
 
         // إعادة تطبيق البحث الحالي (لو فيه) بعد أي تحديث للبيانات
         applySettlementFilter('list');
@@ -1871,6 +1889,7 @@
       const currency = $('settlementCurrency').value;
       const exchangeRate = parseFloat($('settlementExchangeRate').value) || 0;
       const paxCount = parseInt($('settlementPaxCount').value) || 0;
+      const fileType = $('settlementFileType').value === 'opt' ? 'opt' : 'normal';
       const notes = $('settlementNotes').value.trim();
 
       if (!fileCode || !guideName) return showToast('يرجى ادخال كود الملف واسم الأوبريتور', 'error');
@@ -1884,11 +1903,11 @@
       const btn = $('btnSaveSettlement'); btn.disabled = true;
       try {
         await addDoc(collection(db, "settlement_records"), {
-          fileCode, guideName, revenue, expenses, currency, exchangeRate, paxCount, notes, isApproved: false, isDeleted: false, createdAt: new Date()
+          fileCode, guideName, revenue, expenses, currency, exchangeRate, paxCount, fileType, notes, isApproved: false, isDeleted: false, createdAt: new Date()
         });
         showToast('تم حفظ التصفية بنجاح', 'success');
         $('fileCode').value = ''; $('guideName').value = ''; $('settlementRevenue').value = ''; $('settlementExpenses').value = '';
-        $('settlementCurrency').value = 'USD'; $('settlementExchangeRate').value = ''; $('settlementPaxCount').value = ''; $('settlementNotes').value = '';
+        $('settlementCurrency').value = 'USD'; $('settlementExchangeRate').value = ''; $('settlementPaxCount').value = ''; $('settlementFileType').value = 'normal'; this.updateSettlementRateHint('settlementFileType','settlementRateHint'); $('settlementNotes').value = '';
       } catch(e) { showToast(e.message, 'error'); }
       finally { btn.disabled = false; }
     },
@@ -1923,6 +1942,8 @@
       $('editSettlementCurrency').value = item.currency || 'USD';
       $('editSettlementExchangeRate').value = item.exchangeRate || '';
       $('editSettlementPaxCount').value = (item.paxCount != null) ? item.paxCount : '';
+      $('editSettlementFileType').value = (item.fileType === 'opt') ? 'opt' : 'normal';
+      this.updateSettlementRateHint('editSettlementFileType', 'editSettlementRateHint');
       $('editSettlementNotes').value = item.notes || '';
       this.previewSettlementMonth('editFileCode', 'editFileCodeMonthHint');
       $('editSettlementModal').style.display = 'flex';
@@ -1939,6 +1960,7 @@
       const currency = $('editSettlementCurrency').value;
       const exchangeRate = parseFloat($('editSettlementExchangeRate').value) || 0;
       const paxCount = parseInt($('editSettlementPaxCount').value) || 0;
+      const fileType = $('editSettlementFileType').value === 'opt' ? 'opt' : 'normal';
       const notes = $('editSettlementNotes').value.trim();
 
       if (!fileCode || !guideName) return showToast('يرجى استكمال البيانات', 'error');
@@ -1949,7 +1971,7 @@
         if (!confirm('رقم الملف ده مسجل من قبل لنفس الأوبريتور. هل تريد المتابعة؟')) return;
       }
       try {
-        await updateDoc(doc(db, "settlement_records", id), { fileCode, guideName, revenue, expenses, currency, exchangeRate, paxCount, notes });
+        await updateDoc(doc(db, "settlement_records", id), { fileCode, guideName, revenue, expenses, currency, exchangeRate, paxCount, fileType, notes });
         showToast('تم تعديل التصفية بنجاح', 'success');
         this.closeSettlementEditModal();
       } catch(e) { showToast(e.message, 'error'); }
@@ -1959,11 +1981,12 @@
       const active = this.currentSettlements.filter(s => !s.isApproved);
       if (active.length === 0) return showToast('لا توجد بيانات للتصدير', 'error');
       const data = active.map((item, idx) => {
-        const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate);
+        const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate, item.fileType);
         return {
           "م": idx + 1, "كود الملف": item.fileCode, "الشهر": getMonthNameFromFileCode(item.fileCode), "اسم الأوبريتور": item.guideName, "عدد الأفراد": (item.paxCount != null ? item.paxCount : ''),
+          "نوع الملف": (item.fileType === 'opt' ? 'OPT' : 'عادي'),
           "الإيرادات": calcs.revenue, "المصروفات": calcs.expenses, "الربح": calcs.profit,
-          "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": "10%", "مبلغ العمولة": calcs.commissionAmount,
+          "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": calcs.commissionRatePercent + '%', "مبلغ العمولة": calcs.commissionAmount,
           "ملاحظات": item.notes || ''
         };
       });
@@ -2001,11 +2024,12 @@
       const archived = this.currentSettlements.filter(s => s.isApproved);
       if (archived.length === 0) return showToast('لا توجد بيانات في الأرشيف للتصدير', 'error');
       const data = archived.map((item, idx) => {
-        const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate);
+        const calcs = this.calculateSettlementValues(item.revenue, item.expenses, item.exchangeRate, item.fileType);
         return {
           "م": idx + 1, "كود الملف": item.fileCode, "الشهر": getMonthNameFromFileCode(item.fileCode), "اسم الأوبريتور": item.guideName, "عدد الأفراد": (item.paxCount != null ? item.paxCount : ''),
+          "نوع الملف": (item.fileType === 'opt' ? 'OPT' : 'عادي'),
           "الإيرادات": calcs.revenue, "المصروفات": calcs.expenses, "الربح": calcs.profit,
-          "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": "10%", "مبلغ العمولة": calcs.commissionAmount,
+          "الصافي بعد الضريبة": calcs.netAfterTax, "نسبة العمولة": calcs.commissionRatePercent + '%', "مبلغ العمولة": calcs.commissionAmount,
           "ملاحظات": item.notes || '', "الحالة": "معتمد"
         };
       });
@@ -2017,8 +2041,8 @@
       let total = 0;
       const trs = document.querySelectorAll("#settlementsTable tbody tr");
       trs.forEach(tr => {
-        if (tr.style.display !== 'none' && tr.children.length > 10) {
-          const valStr = tr.children[10].innerText.replace(/,/g, '');
+        if (tr.style.display !== 'none' && tr.children.length > 11) {
+          const valStr = tr.children[11].innerText.replace(/,/g, '');
           const val = parseFloat(valStr) || 0;
           total += val;
         }
@@ -2031,8 +2055,8 @@
       let total = 0;
       const trs = document.querySelectorAll("#settlementsArchiveTable tbody tr");
       trs.forEach(tr => {
-        if (tr.style.display !== 'none' && tr.children.length > 10) {
-          const valStr = tr.children[10].innerText.replace(/,/g, '');
+        if (tr.style.display !== 'none' && tr.children.length > 11) {
+          const valStr = tr.children[11].innerText.replace(/,/g, '');
           const val = parseFloat(valStr) || 0;
           total += val;
         }
@@ -2083,7 +2107,7 @@
 
       let totalCommissions = 0;
       this.currentSettlements.forEach(s => {
-        const calcs = this.calculateSettlementValues(s.revenue, s.expenses, s.exchangeRate);
+        const calcs = this.calculateSettlementValues(s.revenue, s.expenses, s.exchangeRate, s.fileType);
         totalCommissions += calcs.commissionAmount;
       });
       if ($('mDashTotalSettlementCommissions')) $('mDashTotalSettlementCommissions').innerText = totalCommissions.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
