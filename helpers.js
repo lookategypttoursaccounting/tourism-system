@@ -454,6 +454,18 @@
     return (month >= 1 && month <= 12) ? ARABIC_MONTH_NAMES[month - 1] : '';
   }
 
+  // بيانات الشهر والسنة من رقم الملف، مستخدمة في تجميع تحليل البيانات (عشان نفس الشهر في سنتين مختلفتين ميتلخبطش)
+  // بترجع label زي "نوفمبر 2025" وsortKey زي "202511" للترتيب الزمني الصحيح
+  function getYearMonthFromFileCode(fileCode) {
+    const s = String(fileCode || '').trim().replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660));
+    const m = s.match(/^(\d{4})(\d{2})[\/\\\-.]/);
+    if (!m) return null;
+    const year = m[1];
+    const month = parseInt(m[2], 10);
+    if (month < 1 || month > 12) return null;
+    return { label: ARABIC_MONTH_NAMES[month - 1] + ' ' + year, sortKey: year + m[2] };
+  }
+
   // توحيد النص للبحث (يتجاهل الفرق بين أ/ا/إ و ى/ي و ة/ه والتشكيل) عشان البحث باسم الشهر ينجح بأي كتابة
   function normalizeSearchText(str) {
     return String(str || '')
@@ -613,6 +625,10 @@
     }).from(element).save();
   }
   function printSettlementsList() { window.print(); }
+  function downloadSettlementAnalysisPDF() {
+    const element = document.getElementById('printableSettlementAnalysis');
+    html2pdf().set({ margin: 0.5, filename: 'Settlement_Analysis.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }, html2canvas: { ignoreElements: (el) => el.classList && el.classList.contains('no-print') } }).from(element).save();
+  }
   function downloadSettlementsPDF() {
     const element = document.getElementById('printableSettlementArea');
     html2pdf().set({ margin: 0.5, filename: 'Settlements_Report.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }, html2canvas: { ignoreElements: (el) => el.classList && el.classList.contains('no-print') } }).from(element).save();

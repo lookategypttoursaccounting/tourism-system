@@ -1878,7 +1878,95 @@
         this.updateSettlementTotalCommission();
         this.updateArchiveSettlementTotalCommission();
         this.updateMasterDashboard();
+        this.renderSettlementAnalysis();
       });
+    },
+
+    // ===== صفحة "تحليل البيانات" في قسم تصفية الأوبريتور =====
+    // 1) الربح حسب الشهر وعدد الملفات لكل أوبريتور   2) مبلغ العمولة حسب الشهر وعدد الأفراد لكل أوبريتور
+    renderSettlementAnalysis() {
+      const opSelect = $('analysisOperatorFilter');
+      const profitBody = $('analysisProfitTableBody');
+      const commissionBody = $('analysisCommissionTableBody');
+      if (!opSelect || !profitBody || !commissionBody) return;
+
+      const records = (this.currentSettlements || []).filter(s => !s.isDeleted);
+
+      // تحديث قائمة الأوبريتورز مع الحفاظ على الاختيار الحالي
+      const operators = [...new Set(records.map(s => (s.guideName || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
+      const selectedOp = opSelect.value;
+      opSelect.innerHTML = '<option value="">كل الأوبريتورز</option>' + operators.map(o => `<option value="${escapeHTML(o)}">${escapeHTML(o)}</option>`).join('');
+      opSelect.value = operators.includes(selectedOp) ? selectedOp : '';
+
+      const filtered = opSelect.value ? records.filter(s => (s.guideName || '').trim() === opSelect.value) : records;
+
+      // تجميع كل سجل حسب (الأوبريتور + الشهر/السنة)
+      const profitGroups = {};   // key: operator|sortKey -> {operator, label, sortKey, fileCount, totalProfit}
+      const commissionGroups = {}; // key: operator|sortKey -> {operator, label, sortKey, totalPax, totalCommission}
+
+      filtered.forEach(s => {
+        const ym = getYearMonthFromFileCode(s.fileCode);
+        if (!ym) return; // رقم ملف بصيغة غير صحيحة، مش هيدخل في التحليل
+        const operator = (s.guideName || '-').trim();
+        const key = operator + '|' + ym.sortKey;
+        const calcs = this.calculateSettlementValues(s.revenue, s.expenses, s.exchangeRate, s.fileType);
+
+        if (!profitGroups[key]) profitGroups[key] = { operator, label: ym.label, sortKey: ym.sortKey, fileCount: 0, totalProfit: 0 };
+        profitGroups[key].fileCount += 1;
+        profitGroups[key].totalProfit += calcs.profit;
+
+        if (!commissionGroups[key]) commissionGroups[key] = { operator, label: ym.label, sortKey: ym.sortKey, totalPax: 0, totalCommission: 0 };
+        commissionGroups[key].totalPax += (s.paxCount || 0);
+        commissionGroups[key].totalCommission += calcs.commissionAmount;
+      });
+
+      const sortRows = (groups) => Object.values(groups).sort((a, b) =>
+        a.operator.localeCompare(b.operator, 'ar') || a.sortKey.localeCompare(b.sortKey)
+      );
+
+      // ---- جدول 1: الربح حسب الشهر وعدد الملفات ----
+      const profitRows = sortRows(profitGroups);
+      if (profitRows.length === 0) {
+        profitBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>';
+      } else {
+        let html = ''; let lastOp = null; let opFileCount = 0; let opProfit = 0;
+        let grandFiles = 0; let grandProfit = 0;
+        const flushSubtotal = () => {
+          if (lastOp === null) return;
+          html += `<tr style="font-weight:700; background:#f8fafc;"><td colspan="2">إجمالي ${escapeHTML(lastOp)}</td><td>${opFileCount}</td><td>${opProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+        };
+        profitRows.forEach(r => {
+          if (r.operator !== lastOp) { flushSubtotal(); lastOp = r.operator; opFileCount = 0; opProfit = 0; }
+          html += `<tr><td>${escapeHTML(r.operator)}</td><td>${escapeHTML(r.label)}</td><td>${r.fileCount}</td><td>${r.totalProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+          opFileCount += r.fileCount; opProfit += r.totalProfit;
+          grandFiles += r.fileCount; grandProfit += r.totalProfit;
+        });
+        flushSubtotal();
+        html += `<tr style="font-weight:700; background:#eef2ff;"><td colspan="2">الإجمالي العام</td><td>${grandFiles}</td><td>${grandProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+        profitBody.innerHTML = html;
+      }
+
+      // ---- جدول 2: مبلغ العمولة حسب الشهر وعدد الأفراد ----
+      const commissionRows = sortRows(commissionGroups);
+      if (commissionRows.length === 0) {
+        commissionBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>';
+      } else {
+        let html = ''; let lastOp = null; let opPax = 0; let opCommission = 0;
+        let grandPax = 0; let grandCommission = 0;
+        const flushSubtotal = () => {
+          if (lastOp === null) return;
+          html += `<tr style="font-weight:700; background:#f8fafc;"><td colspan="2">إجمالي ${escapeHTML(lastOp)}</td><td>${opPax}</td><td style="color:#16a34a;">${opCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+        };
+        commissionRows.forEach(r => {
+          if (r.operator !== lastOp) { flushSubtotal(); lastOp = r.operator; opPax = 0; opCommission = 0; }
+          html += `<tr><td>${escapeHTML(r.operator)}</td><td>${escapeHTML(r.label)}</td><td>${r.totalPax}</td><td style="color:#16a34a;">${r.totalCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+          opPax += r.totalPax; opCommission += r.totalCommission;
+          grandPax += r.totalPax; grandCommission += r.totalCommission;
+        });
+        flushSubtotal();
+        html += `<tr style="font-weight:700; background:#eef2ff;"><td colspan="2">الإجمالي العام</td><td>${grandPax}</td><td style="color:#16a34a;">${grandCommission.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+        commissionBody.innerHTML = html;
+      }
     },
 
     async saveSettlement() {

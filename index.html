@@ -116,6 +116,7 @@
           <button class="sub-tab-btn active" onclick="openSubTab(event, 'addSettlementSubTab', 'settlementTab')" data-i18n="sub_add_settlement">1- إضافة تصفية ملف</button>
           <button class="sub-tab-btn" onclick="openSubTab(event, 'settlementListSubTab', 'settlementTab')" data-i18n="sub_settlement_list">2- سجل تصفيات الملفات</button>
           <button class="sub-tab-btn" onclick="openSubTab(event, 'settlementArchiveSubTab', 'settlementTab')" data-i18n="sub_settlement_archive">3- الأرشيف (التصفيات المعتمدة)</button>
+          <button class="sub-tab-btn" onclick="openSubTab(event, 'settlementAnalysisSubTab', 'settlementTab')">4- تحليل البيانات</button>
         </div>
 
         <button class="tab-btn" id="ticketsBtn" onclick="toggleTicketsMenu(event)">
@@ -581,6 +582,63 @@
                 </thead>
                 <tbody id="settlementsArchiveTableBody">
                   <tr><td colspan="16" style="text-align:center;">لا توجد تصفيات معتمدة في الأرشيف</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. تحليل البيانات -->
+        <div id="settlementAnalysisSubTab" class="sub-tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h3>تحليل البيانات لكل أوبريتور</h3>
+            <div class="btn-group no-print" style="margin:0;">
+              <div class="form-group" style="margin:0; min-width:220px;">
+                <label style="display:block; margin-bottom:4px;">تصفية حسب الأوبريتور</label>
+                <select id="analysisOperatorFilter" onchange="App.renderSettlementAnalysis()">
+                  <option value="">كل الأوبريتورز</option>
+                </select>
+              </div>
+              <button class="pdf-btn" onclick="downloadSettlementAnalysisPDF()">📄 PDF</button>
+            </div>
+          </div>
+
+          <div id="printableSettlementAnalysis">
+            <div class="print-header" style="display:none;">
+              <h2>تحليل بيانات تصفية الأوبريتور</h2>
+              <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
+            </div>
+
+            <h4 style="margin:18px 0 8px;">1) تحليل الربح حسب الشهر وعدد الملفات</h4>
+            <div class="table-wrapper">
+              <table id="analysisProfitTable">
+                <thead>
+                  <tr>
+                    <th>الأوبريتور</th>
+                    <th>الشهر</th>
+                    <th>عدد الملفات</th>
+                    <th>إجمالي الربح</th>
+                  </tr>
+                </thead>
+                <tbody id="analysisProfitTableBody">
+                  <tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 style="margin:24px 0 8px;">2) تحليل مبلغ العمولة حسب الشهر وعدد الأفراد</h4>
+            <div class="table-wrapper">
+              <table id="analysisCommissionTable">
+                <thead>
+                  <tr>
+                    <th>الأوبريتور</th>
+                    <th>الشهر</th>
+                    <th>عدد الأفراد</th>
+                    <th>مبلغ العمولة</th>
+                  </tr>
+                </thead>
+                <tbody id="analysisCommissionTableBody">
+                  <tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>
                 </tbody>
               </table>
             </div>
