@@ -1999,7 +1999,48 @@
         commissionBody.innerHTML = html;
       }
 
+      // نحتفظ بآخر بيانات معروضة (بعد تطبيق فلتر الأوبريتور) عشان نصدّرها لإكسيل بنفس الفلتر الحالي
+      this._lastAnalysisProfitRows = profitRows;
+      this._lastAnalysisCommissionRows = commissionRows;
+      this._lastAnalysisOperatorFilter = opSelect.value || 'كل الأوبريتورز';
+
       this.renderSettlementAnalysisCharts(profitRows, commissionRows, operatorTotals);
+    },
+
+    // تصدير جدولي تحليل البيانات (الربح + العمولة) لملف إكسيل واحد بشيتين، بنفس فلتر الأوبريتور المطبّق حاليًا
+    exportSettlementAnalysis() {
+      const profitRows = this._lastAnalysisProfitRows || [];
+      const commissionRows = this._lastAnalysisCommissionRows || [];
+      if (profitRows.length === 0 && commissionRows.length === 0) return showToast('لا توجد بيانات للتصدير', 'error');
+
+      const fmt2 = (n) => Math.round((n || 0) * 100) / 100;
+
+      const buildSheetRows = (rows, valueKeys) => {
+        // valueKeys: { countKey, countLabel, amountKey, amountLabel, avgLabel }
+        const out = [];
+        let lastOp = null, opCount = 0, opAmount = 0, grandCount = 0, grandAmount = 0;
+        const flushSubtotal = () => {
+          if (lastOp === null) return;
+          out.push({ "الأوبريتور": 'إجمالي ' + lastOp, "الشهر": '', [valueKeys.countLabel]: opCount, [valueKeys.amountLabel]: fmt2(opAmount), [valueKeys.avgLabel]: opCount > 0 ? fmt2(opAmount / opCount) : 0 });
+        };
+        rows.forEach(r => {
+          if (r.operator !== lastOp) { flushSubtotal(); lastOp = r.operator; opCount = 0; opAmount = 0; }
+          const count = r[valueKeys.countKey], amount = r[valueKeys.amountKey];
+          out.push({ "الأوبريتور": r.operator, "الشهر": r.label, [valueKeys.countLabel]: count, [valueKeys.amountLabel]: fmt2(amount), [valueKeys.avgLabel]: count > 0 ? fmt2(amount / count) : 0 });
+          opCount += count; opAmount += amount; grandCount += count; grandAmount += amount;
+        });
+        flushSubtotal();
+        out.push({ "الأوبريتور": 'الإجمالي العام', "الشهر": '', [valueKeys.countLabel]: grandCount, [valueKeys.amountLabel]: fmt2(grandAmount), [valueKeys.avgLabel]: grandCount > 0 ? fmt2(grandAmount / grandCount) : 0 });
+        return out;
+      };
+
+      const profitSheetData = buildSheetRows(profitRows, { countKey: 'fileCount', countLabel: 'عدد الملفات', amountKey: 'totalProfit', amountLabel: 'إجمالي الربح', avgLabel: 'متوسط الربح للملف' });
+      const commissionSheetData = buildSheetRows(commissionRows, { countKey: 'totalPax', countLabel: 'عدد الأفراد', amountKey: 'totalCommission', amountLabel: 'مبلغ العمولة', avgLabel: 'متوسط العمولة للفرد' });
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(profitSheetData), "تحليل الربح");
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(commissionSheetData), "تحليل العمولة");
+      XLSX.writeFile(wb, "Settlement_Analysis.xlsx");
     },
 
     // رسوم بيانية صفحة تحليل البيانات (Chart.js): اتجاه الربح/الملفات/العمولة شهريًا + مقارنة الأوبريتورز
