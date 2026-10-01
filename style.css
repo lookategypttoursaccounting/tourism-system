@@ -159,6 +159,13 @@
     .credit .st-card-icon { background: #fee2e2; color: #dc2626; }
     .balance .st-card-icon { background: #dbeafe; color: #2563eb; }
     .commission .st-card-icon { background: #dcfce7; color: #16a34a; }
+    .st-card.avg { border-right: 5px solid #7c3aed; background: #f5f3ff; }
+    .avg .st-card-icon { background: #ede9fe; color: #7c3aed; }
+    .st-card.pax { border-right: 5px solid #0891b2; background: #ecfeff; }
+    .pax .st-card-icon { background: #cffafe; color: #0891b2; }
+    @media (max-width: 900px) {
+      #analysisChartsGrid { grid-template-columns: 1fr !important; }
+    }
 
     .statement-info-bar {
       background: #eff6ff; border: 1px dashed #93c5fd; padding: 12px 20px;

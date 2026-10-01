@@ -8,6 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- مكتبة PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- مكتبة الرسوم البيانية (صفحة تحليل البيانات) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   
   <link rel="stylesheet" href="style.css">
 </head>
@@ -609,6 +611,72 @@
               <p>LOOK ATEGYPT TOURS — The Luxury DMC of Egypt</p>
             </div>
 
+            <!-- بطاقات إحصائية سريعة -->
+            <div class="dashboard-grid" id="analysisStatCards">
+              <div class="st-card balance">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي عدد الملفات</span>
+                  <span class="st-card-val" id="anStatFiles" style="color:#2563eb;">0</span>
+                </div>
+                <div class="st-card-icon">📁</div>
+              </div>
+              <div class="st-card debit">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي الربح</span>
+                  <span class="st-card-val" id="anStatProfit" style="color:#16a34a;">0</span>
+                </div>
+                <div class="st-card-icon">📈</div>
+              </div>
+              <div class="st-card avg">
+                <div class="st-card-info">
+                  <span class="st-card-title">متوسط الربح لكل ملف</span>
+                  <span class="st-card-val" id="anStatAvgProfit" style="color:#7c3aed;">0</span>
+                </div>
+                <div class="st-card-icon">Ø</div>
+              </div>
+              <div class="st-card commission">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي مبلغ العمولة</span>
+                  <span class="st-card-val" id="anStatCommission" style="color:#16a34a;">0</span>
+                </div>
+                <div class="st-card-icon">💵</div>
+              </div>
+              <div class="st-card pax">
+                <div class="st-card-info">
+                  <span class="st-card-title">إجمالي عدد الأفراد</span>
+                  <span class="st-card-val" id="anStatPax" style="color:#0891b2;">0</span>
+                </div>
+                <div class="st-card-icon">👥</div>
+              </div>
+              <div class="st-card avg">
+                <div class="st-card-info">
+                  <span class="st-card-title">متوسط العمولة لكل فرد</span>
+                  <span class="st-card-val" id="anStatAvgCommission" style="color:#7c3aed;">0</span>
+                </div>
+                <div class="st-card-icon">Ø</div>
+              </div>
+            </div>
+
+            <!-- رسوم بيانية -->
+            <div id="analysisChartsGrid" style="display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:25px;">
+              <div class="table-wrapper" style="padding:14px;">
+                <strong style="display:block; margin-bottom:8px;">الربح حسب الشهر</strong>
+                <div style="position:relative; height:260px;"><canvas id="analysisProfitChart"></canvas></div>
+              </div>
+              <div class="table-wrapper" style="padding:14px;">
+                <strong style="display:block; margin-bottom:8px;">عدد الملفات حسب الشهر</strong>
+                <div style="position:relative; height:260px;"><canvas id="analysisFilesChart"></canvas></div>
+              </div>
+              <div class="table-wrapper" style="padding:14px;">
+                <strong style="display:block; margin-bottom:8px;">مبلغ العمولة حسب الشهر</strong>
+                <div style="position:relative; height:260px;"><canvas id="analysisCommissionChart"></canvas></div>
+              </div>
+              <div class="table-wrapper" style="padding:14px;" id="analysisShareChartWrap">
+                <strong style="display:block; margin-bottom:8px;">توزيع الربح حسب الأوبريتور</strong>
+                <div style="position:relative; height:260px;"><canvas id="analysisShareChart"></canvas></div>
+              </div>
+            </div>
+
             <h4 style="margin:18px 0 8px;">1) تحليل الربح حسب الشهر وعدد الملفات</h4>
             <div class="table-wrapper">
               <table id="analysisProfitTable">
@@ -618,10 +686,11 @@
                     <th>الشهر</th>
                     <th>عدد الملفات</th>
                     <th>إجمالي الربح</th>
+                    <th>متوسط الربح للملف</th>
                   </tr>
                 </thead>
                 <tbody id="analysisProfitTableBody">
-                  <tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>
+                  <tr><td colspan="5" style="text-align:center;">لا توجد بيانات</td></tr>
                 </tbody>
               </table>
             </div>
@@ -635,10 +704,11 @@
                     <th>الشهر</th>
                     <th>عدد الأفراد</th>
                     <th>مبلغ العمولة</th>
+                    <th>متوسط العمولة للفرد</th>
                   </tr>
                 </thead>
                 <tbody id="analysisCommissionTableBody">
-                  <tr><td colspan="4" style="text-align:center;">لا توجد بيانات</td></tr>
+                  <tr><td colspan="5" style="text-align:center;">لا توجد بيانات</td></tr>
                 </tbody>
               </table>
             </div>
