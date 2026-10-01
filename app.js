@@ -2009,37 +2009,44 @@
       const palette = ['#2f8cf0', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0891b2', '#db2777', '#65a30d'];
       const destroy = (key) => { if (this._analysisCharts[key]) { this._analysisCharts[key].destroy(); delete this._analysisCharts[key]; } };
 
-      // تجميع شهري إجمالي (بيجمع كل الأوبريتورز الظاهرين حاليًا حسب الفلتر، مرتب زمنيًا)
-      const monthlyMap = {}; // sortKey -> {label, profit, fileCount, pax, commission}
-      profitRows.forEach(r => {
-        if (!monthlyMap[r.sortKey]) monthlyMap[r.sortKey] = { label: r.label, profit: 0, fileCount: 0, pax: 0, commission: 0 };
-        monthlyMap[r.sortKey].profit += r.totalProfit;
-        monthlyMap[r.sortKey].fileCount += r.fileCount;
-      });
-      commissionRows.forEach(r => {
-        if (!monthlyMap[r.sortKey]) monthlyMap[r.sortKey] = { label: r.label, profit: 0, fileCount: 0, pax: 0, commission: 0 };
-        monthlyMap[r.sortKey].pax += r.totalPax;
-        monthlyMap[r.sortKey].commission += r.totalCommission;
-      });
-      const months = Object.keys(monthlyMap).sort().map(k => monthlyMap[k]);
-      const labels = months.map(m => m.label);
+      // ألوان ثابتة لكل أوبريتور (نفس اللون لنفس الأوبريتور في كل الرسوم، بترتيب الأعلى ربحًا من المخطط الدائري)
+      const opOrder = Object.keys(operatorTotals).sort((a, b) => operatorTotals[b].profit - operatorTotals[a].profit);
+      const colorOf = (op) => palette[opOrder.indexOf(op) % palette.length] || '#64748b';
 
-      // 1) الربح حسب الشهر (أعمدة) + عدد الملفات (خط، محور ثانوي)
+      // شهور مرتبة زمنيًا (كل الشهور الظاهرة في النطاق المفلتر الحالي)
+      const monthLabels = {}; // sortKey -> label
+      profitRows.forEach(r => { monthLabels[r.sortKey] = r.label; });
+      commissionRows.forEach(r => { monthLabels[r.sortKey] = r.label; });
+      const sortKeys = Object.keys(monthLabels).sort();
+      const labels = sortKeys.map(k => monthLabels[k]);
+
+      // الأوبريتورز الظاهرين فعليًا في البيانات المفلترة حاليًا (مرتبين بنفس ترتيب الألوان)
+      const operatorsInView = opOrder.filter(op => profitRows.some(r => r.operator === op) || commissionRows.some(r => r.operator === op));
+
+      // إجمالي كل شهر (لرسم الخط الكلي فوق أعمدة الأوبريتورز)
+      const totalFilesByMonth = {}, totalPaxByMonth = {};
+      profitRows.forEach(r => { totalFilesByMonth[r.sortKey] = (totalFilesByMonth[r.sortKey] || 0) + r.fileCount; });
+      commissionRows.forEach(r => { totalPaxByMonth[r.sortKey] = (totalPaxByMonth[r.sortKey] || 0) + r.totalPax; });
+
+      // 1) الربح حسب الشهر — عمود لكل أوبريتور (اسمه ظاهر في الأسطورة) + خط إجمالي عدد الملفات
       const profitCanvas = $('analysisProfitChart');
       if (profitCanvas) {
         destroy('profit');
+        const profitByOpMonth = {}; // operator -> sortKey -> total
+        profitRows.forEach(r => { (profitByOpMonth[r.operator] = profitByOpMonth[r.operator] || {})[r.sortKey] = r.totalProfit; });
+        const datasets = operatorsInView.map(op => ({
+          type: 'bar', label: op, backgroundColor: colorOf(op), yAxisID: 'y',
+          data: sortKeys.map(k => (profitByOpMonth[op] && profitByOpMonth[op][k]) || 0)
+        }));
+        datasets.push({ type: 'line', label: 'إجمالي عدد الملفات', data: sortKeys.map(k => totalFilesByMonth[k] || 0), borderColor: '#1e293b', backgroundColor: '#1e293b', yAxisID: 'y1', tension: 0.3 });
         this._analysisCharts.profit = new Chart(profitCanvas, {
           type: 'bar',
-          data: {
-            labels,
-            datasets: [
-              { type: 'bar', label: 'الربح', data: months.map(m => m.profit), backgroundColor: '#2f8cf0', yAxisID: 'y' },
-              { type: 'line', label: 'عدد الملفات', data: months.map(m => m.fileCount), borderColor: '#f59e0b', backgroundColor: '#f59e0b', yAxisID: 'y1', tension: 0.3 }
-            ]
-          },
+          data: { labels, datasets },
           options: {
             responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
             scales: {
+              x: { stacked: false },
               y: { position: 'left', title: { display: true, text: 'الربح' } },
               y1: { position: 'right', title: { display: true, text: 'عدد الملفات' }, grid: { drawOnChartArea: false } }
             }
@@ -2047,32 +2054,44 @@
         });
       }
 
-      // 2) عدد الملفات حسب الشهر (أعمدة بسيطة)
+      // 2) عدد الملفات حسب الشهر — عمود لكل أوبريتور
       const filesCanvas = $('analysisFilesChart');
       if (filesCanvas) {
         destroy('files');
+        const filesByOpMonth = {};
+        profitRows.forEach(r => { (filesByOpMonth[r.operator] = filesByOpMonth[r.operator] || {})[r.sortKey] = r.fileCount; });
+        const datasets = operatorsInView.map(op => ({
+          label: op, backgroundColor: colorOf(op),
+          data: sortKeys.map(k => (filesByOpMonth[op] && filesByOpMonth[op][k]) || 0)
+        }));
         this._analysisCharts.files = new Chart(filesCanvas, {
           type: 'bar',
-          data: { labels, datasets: [{ label: 'عدد الملفات', data: months.map(m => m.fileCount), backgroundColor: '#7c3aed' }] },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+          data: { labels, datasets },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
         });
       }
 
-      // 3) مبلغ العمولة حسب الشهر (أعمدة) + عدد الأفراد (خط، محور ثانوي)
+      // 3) مبلغ العمولة حسب الشهر — عمود لكل أوبريتور + خط إجمالي عدد الأفراد
       const commissionCanvas = $('analysisCommissionChart');
       if (commissionCanvas) {
         destroy('commission');
+        const commissionByOpMonth = {};
+        commissionRows.forEach(r => { (commissionByOpMonth[r.operator] = commissionByOpMonth[r.operator] || {})[r.sortKey] = r.totalCommission; });
+        const datasets = operatorsInView.map(op => ({
+          type: 'bar', label: op, backgroundColor: colorOf(op), yAxisID: 'y',
+          data: sortKeys.map(k => (commissionByOpMonth[op] && commissionByOpMonth[op][k]) || 0)
+        }));
+        datasets.push({ type: 'line', label: 'إجمالي عدد الأفراد', data: sortKeys.map(k => totalPaxByMonth[k] || 0), borderColor: '#1e293b', backgroundColor: '#1e293b', yAxisID: 'y1', tension: 0.3 });
         this._analysisCharts.commission = new Chart(commissionCanvas, {
           type: 'bar',
-          data: {
-            labels,
-            datasets: [
-              { type: 'bar', label: 'مبلغ العمولة', data: months.map(m => m.commission), backgroundColor: '#16a34a', yAxisID: 'y' },
-              { type: 'line', label: 'عدد الأفراد', data: months.map(m => m.pax), borderColor: '#0891b2', backgroundColor: '#0891b2', yAxisID: 'y1', tension: 0.3 }
-            ]
-          },
+          data: { labels, datasets },
           options: {
             responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
             scales: {
               y: { position: 'left', title: { display: true, text: 'العمولة' } },
               y1: { position: 'right', title: { display: true, text: 'عدد الأفراد' }, grid: { drawOnChartArea: false } }
@@ -2081,16 +2100,15 @@
         });
       }
 
-      // 4) توزيع الربح حسب الأوبريتور (دائري) — مقارنة شاملة بين كل الأوبريتورز بغض النظر عن الفلتر الحالي
+      // 4) توزيع الربح حسب الأوبريتور (دائري) — مقارنة شاملة بين كل الأوبريتورز بغض النظر عن الفلتر الحالي، بنفس ألوان الأوبريتورز في باقي الرسوم
       const shareCanvas = $('analysisShareChart');
       if (shareCanvas) {
         destroy('share');
-        const opNames = Object.keys(operatorTotals).sort((a, b) => operatorTotals[b].profit - operatorTotals[a].profit);
         this._analysisCharts.share = new Chart(shareCanvas, {
           type: 'doughnut',
           data: {
-            labels: opNames,
-            datasets: [{ data: opNames.map(o => operatorTotals[o].profit), backgroundColor: opNames.map((_, i) => palette[i % palette.length]) }]
+            labels: opOrder,
+            datasets: [{ data: opOrder.map(o => operatorTotals[o].profit), backgroundColor: opOrder.map(colorOf) }]
           },
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
         });
